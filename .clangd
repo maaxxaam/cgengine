@@ -1,0 +1,17 @@
+CompileFlags:
+  Add: [
+    "-xc++", 
+    "-std=c++17", 
+    "-I/home/maaxxaam/git/vulkan-guide", 
+    "-I/home/maaxxaam/git/vulkan-guide/third_party/glm", 
+    "-I/home/maaxxaam/git/vulkan-guide/third_party/imgui", 
+    "-I/home/maaxxaam/git/vulkan-guide/third_party/vkbootstrap", 
+    "-I/home/maaxxaam/git/vulkan-guide/third_party/vma", 
+    "-I/home/maaxxaam/git/vulkan-guide/third_party/volk", 
+    "-I/home/maaxxaam/git/vulkan-guide/third_party/stb_image", 
+    "-I/home/maaxxaam/git/vulkan-guide/third_party/tinyobjloader", 
+    "-I/home/maaxxaam/git/vulkan-guide/third_party/entt/src", 
+    "-I/home/maaxxaam/git/vulkan-guide/third_party/expected/include/tl", 
+    "-I/home/maaxxaam/git/vulkan-guide/third_party/_deps/joltphysics-src", 
+    "-I/usr/include/bullet/",
+    ]
