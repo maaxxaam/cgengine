@@ -1,3 +1,6 @@
-[submodule "third_party/entt"]
+[submodule "expected"]
+	path = third_party/expected
+	url = https://github.com/TartanLlama/expected
+[submodule "entt"]
 	path = third_party/entt
 	url = https://github.com/skypjack/entt

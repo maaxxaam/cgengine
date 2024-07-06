@@ -4,3 +4,9 @@
 /*.cmake
 /CMakeCache.txt
 /*.a
+/Makefile
+/_deps
+/third_party/CMakeCache.txt
+/third_party/CMakeFiles/
+/third_party/_deps/
+/third_party/*.a
