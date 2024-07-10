@@ -26,7 +26,7 @@ void Camera::updateProjection() {
             _data.proj = glm::ortho(-_viewportSize.x/2, _viewportSize.x/2, -_viewportSize.y/2, -_viewportSize.y/2, 1e-2f, 1e4f);
             break;
         case CameraProjection::Perspective:
-            _data.proj = glm::perspective(glm::radians(70.0f), _viewportSize.x / _viewportSize.y, 1e-2f, 1e4f);
+            _data.proj = glm::perspective(glm::radians(70.0f), _viewportSize.x / _viewportSize.y, 1e-2f, 1e5f);
             // Flip projection according to OpenGL matrices convention?
 	        _data.proj[1][1] *= -1;	
             break;

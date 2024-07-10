@@ -10,6 +10,7 @@
 
 #include "base.h"
 #include "render.h"
+#include "src/physics/physicsman.h"
 #include "src/update/update.h"
 #include "src/vector.h"
 #include "src/error.h"
@@ -26,27 +27,30 @@ class Object;
 
 struct RigidBodyComponent: public Update, public ComponentBase {
 public:
-    RigidBodyComponent(const Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform, RigidBodyType type = RigidBodyType::Dynamic, std::optional<float> mass = std::nullopt);
+    RigidBodyComponent(Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform, RigidBodyType type = RigidBodyType::Dynamic, std::optional<float> mass = std::nullopt);
     ~RigidBodyComponent();
 
-    static RigidBodyComponent Box(const Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform);
+    static RigidBodyComponent Box(Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform);
 
-	static RigidBodyComponent Cylinder(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
+	static RigidBodyComponent Cylinder(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
 
-	static RigidBodyComponent Capsule(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
+	static RigidBodyComponent Capsule(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
 
-	static RigidBodyComponent Sphere(const Object &self, float radius, watch_ptr<TransformComponent> transform);
+	static RigidBodyComponent Sphere(Object &self, float radius, watch_ptr<TransformComponent> transform);
 
 	MaybeError create();
 	MaybeError createAndAdd();
 	void add();
 	void remove();
+	void scheduleRemove();
 
 	bool isSimulated() const { return _inSimulation; };
 
 	MaybeError update(float delta) override;
 
 	void applyCentralImpulse(Vec3 impulse);
+	void applyTorque(Vec3 impulse);
+	void applyCentralImpulseAngular(Vec3 impulse);
 	glm::vec3 GetPosition() const;
 	glm::vec3 GetVelocity() const;
 	void setPosition(Vec3 position);
@@ -58,11 +62,15 @@ public:
 
 	JPH::BodyID getID() { return _id; };
 
+	void setContactAddedCallback(Physics::ContactCallback callback) { _callbacks.onContactAdded = callback; };
+	watch_ptr<JPH::Body> _body;
+	
 private:
 	// Physics
 	watch_ptr<TransformComponent> _transform;
-	std::shared_ptr<JPH::Body> _body;
 	JPH::BodyID _id;
 	bool _created, _inSimulation;
 	JPH::BodyCreationSettings _initSettings;
+	Physics::PhysicalCallbacks _callbacks;
+	bool _toRemove = false;
 };

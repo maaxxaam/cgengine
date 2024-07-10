@@ -43,24 +43,25 @@ VertexInputDescription Vertex::get_vertex_description() {
 }
 
 tl::expected<Mesh, Error*> meshFromOBJ(const char* fileName) {
-	tinyobj::attrib_t vertexArrays;
-	std::vector<tinyobj::shape_t> objectInfo;
-	// materials contains the information about the material of each shape, not used yet.
-	std::vector<tinyobj::material_t> materials;
+	// Note: by default, vertices are triangulated
+	auto config = tinyobj::ObjReaderConfig();
+	auto reader = tinyobj::ObjReader();
+	reader.ParseFromFile(fileName);
 
-	//error and warning output from the load function
-	std::string warn, err;
-
-	tinyobj::LoadObj(&vertexArrays, &objectInfo, &materials, &warn, &err, fileName,
-		nullptr);
-	
+	// warning output from the load function
+	std::string warn = reader.Warning();
 	if (!warn.empty()) {
 		std::cout << "WARN: " << warn << "\n";
 	}
 
-	if (!err.empty()) {
-		return tl::unexpected(new Error(ErrorMessage(err)));
+	if (!reader.Valid()) {
+		return tl::unexpected(new Error(ErrorMessage(reader.Error())));
 	}
+
+	tinyobj::attrib_t vertexArrays = reader.GetAttrib();
+	std::vector<tinyobj::shape_t> objectInfo = reader.GetShapes();
+	// materials contains the information about the material of each shape, not used yet.
+	// std::vector<tinyobj::material_t> materials = reader.GetMaterials();
 
 	Mesh result{};
 
@@ -92,6 +93,7 @@ tl::expected<Mesh, Error*> meshFromOBJ(const char* fileName) {
 
 				// Load normal
 				stride = 3 * idx.normal_index;
+				if (idx.normal_index != -1)
 				new_vert.normal = {
 					vertexArrays.normals[stride],
 					vertexArrays.normals[stride + 1],
@@ -100,13 +102,19 @@ tl::expected<Mesh, Error*> meshFromOBJ(const char* fileName) {
 
 				// Load UV coordinates
 				stride = idx.texcoord_index << 1;
+				if (idx.texcoord_index != -1)
 				new_vert.uv = {
 					vertexArrays.texcoords[stride],
 					1 - vertexArrays.texcoords[stride + 1]
 				};
 
-				//we are setting the vertex color as the vertex normal. This is just for display purposes
-				new_vert.color = new_vert.normal;
+				stride = idx.vertex_index * 3;
+				if (idx.texcoord_index != -1)
+				new_vert.color = {
+					vertexArrays.colors[stride],
+					vertexArrays.colors[stride + 1],
+					vertexArrays.colors[stride + 2]
+				};
 
 				result._vertices.push_back(new_vert);
 			}

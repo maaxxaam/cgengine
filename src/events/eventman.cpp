@@ -38,6 +38,7 @@ inline void EventManager::invokeCallbacks(const EventData data, const uint32_t a
 }
 
 void EventManager::injectKeyboardInput(const Events::Key key, const Events::KeyState state, const uint32_t modifiers) {
+	fmt::println("Key inject code: {}", static_cast<int>(key));
 	KeyCombination combination = std::make_pair(key, modifiers);
 	const auto action = _keyBindings.map()->find(combination);
 	if (action == _keyBindings.map()->cend()) return;
@@ -90,7 +91,7 @@ void EventManager::injectGamepad1DAxisInput(const Events::Gamepad1DAxis axis, co
 EventCallback* EventManager::setActionCallback(const std::initializer_list<uint32_t>& actions, EventCallback callback) {
 	EventCallback* callAddress = &callback;
 	for (const auto &action: actions) {
-		(*callAddress)(Event{action, KeyEvent{ Events::kPress }});
+		// (*callAddress)(Event{action, KeyEvent{ Events::kPress }});
 		_actionCallbacks.insert(std::make_pair(action, callback));
 	}
 

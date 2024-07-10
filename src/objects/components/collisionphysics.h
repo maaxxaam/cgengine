@@ -12,16 +12,16 @@
 
 class CollisionPhysicsComponent: public Update, public ComponentBase {
 public:
-    CollisionPhysicsComponent(const Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform);
+    CollisionPhysicsComponent(Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform);
 	~CollisionPhysicsComponent();
 
-    static CollisionPhysicsComponent Box(const Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform);
+    static CollisionPhysicsComponent Box(Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform);
 
-	static CollisionPhysicsComponent Cylinder(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
+	static CollisionPhysicsComponent Cylinder(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
 
-	static CollisionPhysicsComponent Capsule(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
+	static CollisionPhysicsComponent Capsule(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
 
-	static CollisionPhysicsComponent Sphere(const Object &self, float radius, watch_ptr<TransformComponent> transform);
+	static CollisionPhysicsComponent Sphere(Object &self, float radius, watch_ptr<TransformComponent> transform);
 
 	MaybeError create();
 	MaybeError createAndAdd();
@@ -40,10 +40,11 @@ public:
 	MaybeError update(float delta) override;
 private:
 	watch_ptr<TransformComponent> _transform;
-	std::shared_ptr<JPH::Body> _body;
+	watch_ptr<JPH::Body> _body;
 	JPH::BodyID _id;
 	JPH::BodyCreationSettings _initSettings;
 	bool _created, _inSimulation;
+	Physics::PhysicalCallbacks _callbacks;
 };
 
 // typedef std::shared_ptr<CollisionPhysicsComponent> CollisionPhysicsPtr;

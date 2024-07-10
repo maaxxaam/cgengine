@@ -28,6 +28,7 @@ public:
 
     glm::vec3 getPosition() { return _position; };
     glm::vec3 getOrientation() { return _orientationPYR; };
+    glm::vec3 getRotation() { return _rotation; };
     glm::vec2 getViewport() { return _viewportSize; };
 protected:
     inline void updateProjection();

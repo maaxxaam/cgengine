@@ -12,6 +12,7 @@ struct Timer {
 
 class TimerStorage {
 public:
+    int queuedTimers() const { return _timers.size(); };
     void addTimer(Timer& timer);
     void addTimer(float time, std::function<std::optional<Error *> ()>& onTimer);
     void addTimer(float time, std::function<std::optional<Error *> ()>&& onTimer);

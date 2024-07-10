@@ -17,17 +17,17 @@ public:
 	float _jumpImpulse;
 
 	//DynamicCharacterController(const glm::vec3 spawnPos, float radius, float height, float mass, float stepHeight);
-	DynamicCharacterController(const Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform, std::optional<float> mass = std::nullopt);
+	DynamicCharacterController(Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform, std::optional<float> mass = std::nullopt);
 	DynamicCharacterController(const DynamicCharacterController &other);
 	~DynamicCharacterController();
 
-    static DynamicCharacterController Box(const Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform);
+    static DynamicCharacterController Box(Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform);
 
-	static DynamicCharacterController Cylinder(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
+	static DynamicCharacterController Cylinder(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
 
-	static DynamicCharacterController Capsule(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
+	static DynamicCharacterController Capsule(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform);
 
-	static DynamicCharacterController Sphere(const Object &self, float radius, watch_ptr<TransformComponent> transform);
+	static DynamicCharacterController Sphere(Object &self, float radius, watch_ptr<TransformComponent> transform);
 
 	void create();
 	void createAndAdd();
@@ -39,6 +39,8 @@ public:
 	MaybeError update(float delta) override;
 
 	void applyCentralImpulse(Vec3 impulse);
+	void applyCentralImpulseAngular(Vec3 impulse);
+	void applyTorque(Vec3 impulse);
 	glm::vec3 GetPosition() const;
 	glm::vec3 GetVelocity() const;
 	void setVelocity(Vec3 velocity);
@@ -63,10 +65,10 @@ public:
 		_hasRender = true;
 	}
 	RenderObject* getRender() { return _render; };
+	std::shared_ptr<JPH::Character> _body;
 private:
 	// Physics
 	watch_ptr<TransformComponent> _transform;
-	std::shared_ptr<JPH::Character> _body;
 	JPH::BodyID _id;
 	JPH::CharacterSettings _initSettings;
 	CharacterAdditionalData _initExtraSettings;

@@ -157,7 +157,10 @@ PhysicsManager::PhysicsManager():
     _physicsSystem.SetBodyActivationListener(&_activationListener);
     _physicsSystem.SetContactListener(&_contactListener);
     JPH::BodyInterface &temp = _physicsSystem.GetBodyInterface();
-    _bodyInterface.reset(&temp);
+    _bodyInterface = watch_ptr<JPH::BodyInterface>(&temp);
+    const JPH::NarrowPhaseQuery &tquery = _physicsSystem.GetNarrowPhaseQuery();
+    _nphasequery = watch_ptr<const JPH::NarrowPhaseQuery>(&tquery);
+    _physicsSystem.SetGravity(JPH::Vec3(0.f, -9.8f, 0.f));
 }
 
 void PhysicsManager::update(float delta) {

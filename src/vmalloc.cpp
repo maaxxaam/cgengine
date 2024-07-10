@@ -37,6 +37,8 @@ tl::expected<AllocatedBuffer, VulkanError*> VMAllocator::createBuffer(size_t all
 		ErrorMessage("Failed to create buffer with size {}; usage flags {}, {}", allocSize, usage, (int)memoryUsage)));
 	}
 
+	// fmt::println("Creating buffer at {}", (void*)(newBuffer._allocation));
+
     return newBuffer;
 }
 
@@ -45,6 +47,7 @@ void VMAllocator::destroy() {
 }
 
 void VMAllocator::destroyBuffer(AllocatedBuffer& buffer) {
+	// fmt::println("Destroying buffer at {}", (void*)(buffer._allocation));
     vmaDestroyBuffer(_allocator, buffer._buffer, buffer._allocation);
 }
 
@@ -78,9 +81,12 @@ tl::expected<AllocatedImage, VulkanError*> VMAllocator::createImage(VkMemoryProp
 		return tl::unexpected(new VulkanError(depthImageResult, ErrorMessage("Failed to create depth image")));
 	}
 
+	// fmt::println("Creating image at {}", (void*)(result._allocation));
+
     return result;
 }
 
 void VMAllocator::destroyImage(AllocatedImage image) {
+	// fmt::println("Destroying image at {}", (void*)(image._allocation));
 	vmaDestroyImage(_allocator, image._image, image._allocation);
 }

@@ -33,7 +33,13 @@ public:
 
 	//create material and add it to the map
 	Material* addMaterial(VkPipeline pipeline, VkPipelineLayout layout, const std::string& name);
+	std::optional<Material*> getMaterial(const std::string& name);
+
 	Object addEmptyObject();
+	tl::expected<Object, Error*> addRenderObject(const std::string &mapName);
+
+	std::optional<Mesh*> getMesh(const std::string& name);
+
 	Object getObject(entt::entity id);
 
 	auto getSimpleRenders() { return _level._registry.view<RenderObject, TransformComponent>(); };
@@ -43,8 +49,11 @@ public:
 	SimpleView<CollisionPhysicsComponent> getCollisions() { return _level._registry.view<CollisionPhysicsComponent>(); };
 	auto getRenders() { return _level._registry.view<RenderObject, TransformComponent, SSBOIndex>(); };
 
+	entityList getHierarchyOrderedObjects();
+
     virtual MaybeError update(float delta) override;
 
+	void flush() { _onSceneDestruction.flush(); };
 protected:
     DeletionQueue _onSceneDestruction;
 	TimerStorage _timerStorage;
@@ -55,10 +64,6 @@ protected:
 	std::unordered_map<std::string, Material> _materials;
 	std::unordered_map<std::string, Mesh> _meshes;
 	std::unordered_map<std::string, TextureAsset> _loadedTextures;
-
-	std::optional<Material*> getMaterial(const std::string& name);
-
-	std::optional<Mesh*> getMesh(const std::string& name);
 
 	virtual tl::expected<int, Error*> loadMeshes(VulkanEngine* engine) { return 0; };
 

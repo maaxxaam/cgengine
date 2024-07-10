@@ -31,6 +31,7 @@ public:
     VulkanError(const VkResult errorCode, Error *error, const std::string extraErrorMessage);
 
     const VkResult getCode() const { return _errorCode; };
+    bool isResizeError() const;
 private:
     const VkResult _errorCode;
 };

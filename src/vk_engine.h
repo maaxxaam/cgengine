@@ -37,6 +37,8 @@ class VulkanEngine {
 public:
 	bool _isInitialized{ false };
 	int _frameNumber {0};
+	float _time;
+	std::chrono::steady_clock::time_point _start_time;
 
 	VkExtent2D _windowExtent{ 1280 , 1040 };
 
@@ -65,6 +67,7 @@ public:
 	std::vector<VkImageView> _swapchainImageViews;	
 
     DeletionQueue _onEngineShutdown;
+	DeletionQueue _swapchainShutdown;
 	TimerStorage _timerStorage;
 	
 	VmaAllocator _allocator; //vma lib allocator
@@ -114,6 +117,8 @@ public:
 private:
 	//draw loop
 	std::optional<Error*> draw();
+	
+	std::optional<Error*> handleResize();
 
 	tl::expected<int, Error*> initWindow();
 

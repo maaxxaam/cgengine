@@ -128,19 +128,30 @@ tl::expected<AllocatedImage, Error*> vkutil::load_image_from_file(VulkanEngine& 
 }
 
 std::optional<Error *> TextureAsset::loadRGBAFile(VulkanEngine& engine, const char* filePath) {
-	auto image = vkutil::load_image_from_file(engine, "../assets/lost_empire-RGBA.png");
+	auto image = vkutil::load_image_from_file(engine, filePath);
 	if (!image.has_value()) {
-		return new Error(image.error(), "Failed to load Lost Empire texture!");
+		return new Error(image.error(), "Failed to load texture!");
 	}
 	_texture.image = image.value();
 	
 	VkImageViewCreateInfo imageinfo = vkinit::createinfo::imageView(VK_FORMAT_R8G8B8A8_SRGB, _texture.image._image, VK_IMAGE_ASPECT_COLOR_BIT);
 	auto imageViewResult = vkcommand::createImageView(imageinfo);
 	if (!imageViewResult)
-		return new VulkanError(imageViewResult.error()->getCode(), imageViewResult.error(), ErrorMessage("Failed to create image view for the lostEmpire texture"));
+		return new VulkanError(imageViewResult.error()->getCode(), imageViewResult.error(), ErrorMessage("Failed to create image view for the texture"));
 	_texture.imageView = imageViewResult.value();
 	_init = true;
 	return {};
+}
+
+tl::expected<Material, Error*> TextureAsset::createSimpleMaterial(VulkanEngine& engine, Material baseMaterial) {
+	if (!_init) {
+		return tl::unexpected(new Error(ErrorMessage("Tried to create material from an empty texture")));
+	}
+
+    auto createResult = engine.addSingleTextureDescriptor(_texture.imageView);
+    VK_UNEXPECTED_ERROR(createResult, "Could not create a texture descriptor")
+    baseMaterial.textureSet = createResult.value();
+	return baseMaterial;
 }
 
 void TextureAsset::unload() {

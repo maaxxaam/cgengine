@@ -1,11 +1,18 @@
 #include <iostream>
 
+#include "data/KatamariScene.h"
 #include "src/vk_engine.h"
 
 int main(int argc, char* argv[]) {
 	VulkanEngine engine;
 
+	KatamariScene scene;
+	engine.setScene(&scene);
+
+	Physics::prepareJolt();
+
 	auto init = engine.init();
+	engine._start_time = std::chrono::steady_clock::now();
 
 	if (init.has_value()) {
 		std::cerr << "Engine initialization failed:\n" << init.value()->what() << "\n";
@@ -21,6 +28,8 @@ int main(int argc, char* argv[]) {
 	}
 	
 	engine.cleanup();	
+
+	PhysicsMan.destroy();
 
 	return 0;
 }

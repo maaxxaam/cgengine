@@ -4,11 +4,11 @@
 
 #include "dynamiccontroller.h"
 
-DynamicCharacterController::DynamicCharacterController(const Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform, std::optional<float> mass):
+DynamicCharacterController::DynamicCharacterController(Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform, std::optional<float> mass):
 	ComponentBase(self),
 	_deceleration(0.1f), _maxSpeed(5.0f), _jumpImpulse(60.0f),
 	_jumpRechargeTimer(0.0f), _jumpRechargeTime(10.0f), 
-	_created(false), _inSimulation(false) {
+	_created(false), _inSimulation(false), _callbacks({self}) {
 	_transform = transform;
 	const glm::vec3 position = transform->getTranslation();
 	const glm::quat rotation = transform->getOrientation();
@@ -29,7 +29,7 @@ DynamicCharacterController::DynamicCharacterController(const Object &self, JPH::
 }
 
 DynamicCharacterController::DynamicCharacterController(const DynamicCharacterController &other):
-	ComponentBase(other._self) {
+	ComponentBase(other._self), _callbacks(other._callbacks) {
 	_transform = other._transform;
 	_body.reset(other._body.get());
 	_id = other._id;
@@ -127,6 +127,13 @@ void DynamicCharacterController::setVelocity(Vec3 velocity) {
 	_body->SetLinearVelocity(velocity);
 }
 
+void DynamicCharacterController::applyCentralImpulseAngular(Vec3 impulse) {
+	_body->AddImpulse(impulse);
+}
+
+void DynamicCharacterController::applyTorque(Vec3 impulse) {
+}
+
 void DynamicCharacterController::applyCentralImpulse(Vec3 impulse) {
 	_body->AddImpulse(impulse);
 }
@@ -135,22 +142,22 @@ bool DynamicCharacterController::IsOnGround() const {
 	return _body->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround;
 }
 
-DynamicCharacterController DynamicCharacterController::Box(const Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform) { 
+DynamicCharacterController DynamicCharacterController::Box(Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::BoxShapeSettings(halfExtents).Create().Get();
 	return DynamicCharacterController(self, boxShape, transform); 
 }
 
-DynamicCharacterController DynamicCharacterController::Cylinder(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
+DynamicCharacterController DynamicCharacterController::Cylinder(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::CylinderShapeSettings(halfHeight, radius).Create().Get();
 	return DynamicCharacterController(self, boxShape, transform); 
 }
 
-DynamicCharacterController DynamicCharacterController::Capsule(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
+DynamicCharacterController DynamicCharacterController::Capsule(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::CapsuleShapeSettings(halfHeight, radius).Create().Get();
 	return DynamicCharacterController(self, boxShape, transform); 
 }
 
-DynamicCharacterController DynamicCharacterController::Sphere(const Object &self, float radius, watch_ptr<TransformComponent> transform) { 
+DynamicCharacterController DynamicCharacterController::Sphere(Object &self, float radius, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::SphereShapeSettings(radius).Create().Get();
 	return DynamicCharacterController(self, boxShape, transform);
 }

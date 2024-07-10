@@ -10,6 +10,7 @@ public:
     Object(Level* level, const entt::entity& id): _level(level), _id(id) {};
     Object(Level* level);
     Object(const Object &other): _level(other._level), _id(other._id) {};
+    Object(Object &other): _level(other._level), _id(other._id) {};
 
     // Gets existing component for an object
     // WARNING: assumes component exists
@@ -42,6 +43,7 @@ public:
     Object another(entt::entity id) { return Object(_level, id); };
 
     entt::entity getID() const { return _id; };
+    Level* getLevel() { return _level; };
 private:
     entt::entity _id;
     Level* _level;

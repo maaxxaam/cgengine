@@ -5,7 +5,7 @@
 
 #include "error.h"
 #include "allocstructs.h"
-#include "expected.hpp"
+#include "material.h"
 
 class VulkanEngine;
 
@@ -21,6 +21,7 @@ namespace vkutil {
 class TextureAsset {
 public:
 	std::optional<Error *> loadRGBAFile(VulkanEngine& engine, const char* filePath);
+	tl::expected<Material, Error*> createSimpleMaterial(VulkanEngine& engine, Material baseMaterial);
 	void unload();
 	bool isInitialized() { return _init; };
 	const Texture& getData() const { assert(_init); return _texture; };

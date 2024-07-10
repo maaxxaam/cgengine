@@ -11,8 +11,8 @@
 #include "collisionphysics.h"
 #include "src/physics/physicsman.h"
 
-CollisionPhysicsComponent::CollisionPhysicsComponent(const Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform):  
-	ComponentBase(self), _created(false), _inSimulation(false) {
+CollisionPhysicsComponent::CollisionPhysicsComponent(Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform):  
+	ComponentBase(self), _created(false), _inSimulation(false), _callbacks({self}) {
 	_transform = transform;
 	const glm::vec3 position = transform->getTranslation();
 	const glm::quat rotation = transform->getOrientation();
@@ -22,6 +22,7 @@ CollisionPhysicsComponent::CollisionPhysicsComponent(const Object &self, JPH::Sh
 		JPH::EMotionType::Dynamic,
 		Physics::Layers::MOVING);
 	_initSettings.mIsSensor = true;
+	_initSettings.mUserData = reinterpret_cast<JPH::uint64>(&_callbacks);
 }
 
 MaybeError CollisionPhysicsComponent::create() {
@@ -31,7 +32,7 @@ MaybeError CollisionPhysicsComponent::create() {
 	}
 	_created = true;
 	Physics::NewBodyData bodydata = maybeBody.value();
-	_body = std::shared_ptr<JPH::Body>(bodydata.body);
+	_body = watch_ptr<JPH::Body>(bodydata.body);
 	// _body->SetUserData(reinterpret_cast<JPH::uint64>(this));
 	_id = bodydata.id;
 	_created = true;
@@ -45,7 +46,7 @@ MaybeError CollisionPhysicsComponent::createAndAdd() {
 	}
 	_created = true;
 	Physics::NewBodyData bodydata = maybeBody.value();
-	_body = std::shared_ptr<JPH::Body>(bodydata.body);
+	_body = watch_ptr<JPH::Body>(bodydata.body);
 	// _body->SetUserData(reinterpret_cast<JPH::uint64>(this));
 	_id = bodydata.id;
 	_created = true;
@@ -54,11 +55,9 @@ MaybeError CollisionPhysicsComponent::createAndAdd() {
 }
 
 CollisionPhysicsComponent::~CollisionPhysicsComponent() {
-	if (_body.use_count() == 1) {
-		if (_inSimulation)
-			PhysicsMan.removeBody(_id);
-		PhysicsMan.destroyBody(_id);
-	}
+	if (_inSimulation)
+		PhysicsMan.removeBody(_id);
+	PhysicsMan.destroyBody(_id);
 }
 
 void CollisionPhysicsComponent::add() {
@@ -88,22 +87,22 @@ MaybeError CollisionPhysicsComponent::update(float delta) {
 	return std::nullopt;
 }
 
-CollisionPhysicsComponent CollisionPhysicsComponent::Box(const Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform) { 
+CollisionPhysicsComponent CollisionPhysicsComponent::Box(Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::BoxShapeSettings(halfExtents).Create().Get();
 	return CollisionPhysicsComponent(self, boxShape, transform); 
 }
 
-CollisionPhysicsComponent CollisionPhysicsComponent::Cylinder(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
+CollisionPhysicsComponent CollisionPhysicsComponent::Cylinder(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::CylinderShapeSettings(halfHeight, radius).Create().Get();
 	return CollisionPhysicsComponent(self, boxShape, transform); 
 }
 
-CollisionPhysicsComponent CollisionPhysicsComponent::Capsule(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
+CollisionPhysicsComponent CollisionPhysicsComponent::Capsule(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::CapsuleShapeSettings(halfHeight, radius).Create().Get();
 	return CollisionPhysicsComponent(self, boxShape, transform); 
 }
 
-CollisionPhysicsComponent CollisionPhysicsComponent::Sphere(const Object &self, float radius, watch_ptr<TransformComponent> transform) { 
+CollisionPhysicsComponent CollisionPhysicsComponent::Sphere(Object &self, float radius, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::SphereShapeSettings(radius).Create().Get();
 	return CollisionPhysicsComponent(self, boxShape, transform);
 }

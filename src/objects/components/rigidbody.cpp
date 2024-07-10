@@ -7,8 +7,8 @@
 
 #include "rigidbody.h"
 
-RigidBodyComponent::RigidBodyComponent(const Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform, RigidBodyType type, std::optional<float> mass):
-	ComponentBase(self), _created(false), _inSimulation(false) {
+RigidBodyComponent::RigidBodyComponent(Object &self, JPH::ShapeRefC shape, watch_ptr<TransformComponent> transform, RigidBodyType type, std::optional<float> mass):
+	ComponentBase(self), _created(false), _inSimulation(false), _callbacks({self}) {
 	_transform = transform;
 	const glm::vec3 position = transform->getTranslation();
 	const glm::quat rotation = transform->getOrientation();
@@ -37,6 +37,7 @@ RigidBodyComponent::RigidBodyComponent(const Object &self, JPH::ShapeRefC shape,
 		_initSettings.mMassPropertiesOverride = JPH::MassProperties();
 		_initSettings.mMassPropertiesOverride.mMass = mass.value();
 	}
+	_initSettings.mUserData = reinterpret_cast<JPH::uint64>(&_callbacks);
 }
 
 MaybeError RigidBodyComponent::create() {
@@ -46,7 +47,7 @@ MaybeError RigidBodyComponent::create() {
 	}
 	_created = true;
 	Physics::NewBodyData bodydata = maybeBody.value();
-	_body = std::shared_ptr<JPH::Body>(bodydata.body);
+	_body = watch_ptr<JPH::Body>(bodydata.body);
 	// _body->SetUserData(reinterpret_cast<JPH::uint64>(this));
 	_id = bodydata.id;
 	_created = true;
@@ -60,7 +61,7 @@ MaybeError RigidBodyComponent::createAndAdd() {
 	}
 	_created = true;
 	Physics::NewBodyData bodydata = maybeBody.value();
-	_body = std::shared_ptr<JPH::Body>(bodydata.body);
+	_body = watch_ptr<JPH::Body>(bodydata.body);
 	// _body->SetUserData(reinterpret_cast<JPH::uint64>(this));
 	_id = bodydata.id;
 	_created = true;
@@ -69,11 +70,9 @@ MaybeError RigidBodyComponent::createAndAdd() {
 }
 
 RigidBodyComponent::~RigidBodyComponent() {
-	if (_body.use_count() == 1) {
-		if (_inSimulation)
-			PhysicsMan.removeBody(_id);
-		PhysicsMan.destroyBody(_id);
-	}
+	if (_inSimulation)
+		PhysicsMan.removeBody(_id);
+	PhysicsMan.destroyBody(_id);
 }
 
 void RigidBodyComponent::add() {
@@ -84,6 +83,10 @@ void RigidBodyComponent::add() {
 void RigidBodyComponent::remove() {
 	PhysicsMan.removeBody(_id);
 	_inSimulation = false;
+}
+
+void RigidBodyComponent::scheduleRemove() {
+	_toRemove = true;
 }
 
 glm::vec3 RigidBodyComponent::GetPosition() const {
@@ -104,9 +107,24 @@ void RigidBodyComponent::setVelocity(Vec3 velocity) {
 
 MaybeError RigidBodyComponent::update(float delta) {
 	// Update transform
-	_transform->setMatrix(_body->GetWorldTransform());
+	if (_toRemove) {
+		remove();
+		_toRemove = false;
+	}
+	if (_inSimulation) {
+		_transform->setMatrix(_body->GetWorldTransform());
+	}
 
     return std::nullopt;
+}
+
+void RigidBodyComponent::applyCentralImpulseAngular(Vec3 impulse) {
+	_body->AddImpulse(impulse);
+	_body->AddTorque(impulse);
+}
+
+void RigidBodyComponent::applyTorque(Vec3 impulse) {
+	_body->AddTorque(impulse);
 }
 
 void RigidBodyComponent::applyCentralImpulse(Vec3 impulse) {
@@ -129,22 +147,22 @@ void RigidBodyComponent::setRestitution(float restitution) {
 	}
 }
 
-RigidBodyComponent RigidBodyComponent::Box(const Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform) { 
+RigidBodyComponent RigidBodyComponent::Box(Object &self, Vec3 halfExtents, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::BoxShapeSettings(halfExtents).Create().Get();
 	return RigidBodyComponent(self, boxShape, transform); 
 }
 
-RigidBodyComponent RigidBodyComponent::Cylinder(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
+RigidBodyComponent RigidBodyComponent::Cylinder(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::CylinderShapeSettings(halfHeight, radius).Create().Get();
 	return RigidBodyComponent(self, boxShape, transform); 
 }
 
-RigidBodyComponent RigidBodyComponent::Capsule(const Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
+RigidBodyComponent RigidBodyComponent::Capsule(Object &self, float halfHeight, float radius, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::CapsuleShapeSettings(halfHeight, radius).Create().Get();
 	return RigidBodyComponent(self, boxShape, transform); 
 }
 
-RigidBodyComponent RigidBodyComponent::Sphere(const Object &self, float radius, watch_ptr<TransformComponent> transform) { 
+RigidBodyComponent RigidBodyComponent::Sphere(Object &self, float radius, watch_ptr<TransformComponent> transform) { 
 	JPH::ShapeRefC boxShape = JPH::SphereShapeSettings(radius).Create().Get();
 	return RigidBodyComponent(self, boxShape, transform);
 }

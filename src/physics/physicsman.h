@@ -20,7 +20,9 @@
 #include <memory>
 #include <optional>
 
+#include "src/objects/object.h"
 #include "src/singleton.h"
+#include "src/watchptr.h"
 
 struct CharacterAdditionalData {
 	JPH::Vec3 position;
@@ -105,6 +107,7 @@ using ContactCallback = std::function<void (const JPH::Body &, const JPH::Body &
 using ActivationCallback = std::function<void (const JPH::BodyID &, JPH::uint64)>;
 
 struct PhysicalCallbacks {
+	Object caller;
 	std::optional<ValidateCallback> onContactValidate;
 	std::optional<ContactCallback> onContactAdded;
 	std::optional<ContactCallback> onContactPersisted;
@@ -159,7 +162,8 @@ private:
     JPH::TempAllocatorImpl _tempAllocator;
 	JPH::JobSystemThreadPool _threadPool;
 	JPH::PhysicsSystem _physicsSystem;
-	std::unique_ptr<JPH::BodyInterface> _bodyInterface;
+	watch_ptr<const JPH::NarrowPhaseQuery> _nphasequery;
+	watch_ptr<JPH::BodyInterface> _bodyInterface;
 
 	// Interfaces
 	BPLayerInterfaceImpl _broadPhaseLayers;

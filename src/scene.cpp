@@ -30,6 +30,19 @@ Object Scene::getObject(entt::entity id) {
 	return _level.getObject(id);
 }
 
+tl::expected<Object, Error*> Scene::addRenderObject(const std::string &mapName) {
+	auto mat = getMaterial(mapName);
+	auto mesh = getMesh(mapName);
+	if (!mesh.has_value() | !mat.has_value()) {
+		return tl::unexpected(new Error(ErrorMessage("Couldn't find material or mesh to create object")));
+	}
+	Mesh m = *(mesh.value());
+	Object result = _level.addObject();
+    result.addComponent<HierarchyComponent>();
+	result.addComponent<RenderObject>(mesh.value(), mat.value());
+    return result;
+}
+
 Object Scene::addEmptyObject() {
 	Object result = _level.addObject();
     result.addComponent<HierarchyComponent>();
@@ -50,6 +63,25 @@ std::optional<Mesh*> Scene::getMesh(const std::string& name) {
 		return std::nullopt;
 	}
 	return &(*it).second;
+}
+
+entityList Scene::getHierarchyOrderedObjects() {
+	SimpleView<HierarchyComponent> hierarchies = _level._registry.view<HierarchyComponent>();
+	entityList result;
+	// Get root ids
+	for (auto &&[entity, hier]: hierarchies.each()) {
+		if (hier._parentId == entt::null) {
+			result.push_back(entity);
+		}
+	}
+	entityList queue = result;
+	for (auto & entity: queue) {
+		Object item = getObject(entity);
+		watch_ptr<HierarchyComponent> itemh = item.getComponentDefault<HierarchyComponent>();
+		entityList newChildren = itemh->allChildren();
+		result.insert(result.end(), newChildren.begin(), newChildren.end());
+	}
+	return result;
 }
 
 MaybeError Scene::update(float delta) {

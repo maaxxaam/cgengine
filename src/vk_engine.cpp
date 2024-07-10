@@ -85,6 +85,8 @@ void VulkanEngine::cleanup() {
 	// Make sure the gpu has stopped doing its things
 	vkDeviceWaitIdle(DeviceRef());
 
+	_scene->flush();
+	_swapchainShutdown.flush();
 	_onEngineShutdown.flush();
 
 	vkDestroySurfaceKHR(_instance, _surface, nullptr);
@@ -95,6 +97,30 @@ void VulkanEngine::cleanup() {
 
 	//glfwDestroyWindow(_window->getWindowHandle());
 	//glfwTerminate();
+}
+
+std::optional<Error*> VulkanEngine::handleResize() {
+	// When minimized, window can have 0 width / height. Postpone resizing in that case
+	unsigned int width = 0, height = 0;
+	_window->getSize(width, height);
+    while (width == 0 || height == 0) {
+        glfwWaitEvents();
+		_window->getSize(width, height);
+    }
+
+	// Make sure the gpu has stopped doing its things
+	vkDeviceWaitIdle(DeviceRef());
+
+	_swapchainShutdown.flush();
+
+	auto resizeResult = initSwapchain()
+		.and_then([&](int x) { return initFramebuffers(); });
+	
+	if (!resizeResult.has_value()) {
+		return new Error(resizeResult.error(), ErrorMessage("Failed to resize swapchain"));
+	}
+
+	return std::nullopt;
 }
 
 std::optional<Error*> VulkanEngine::draw() {
@@ -117,8 +143,14 @@ std::optional<Error*> VulkanEngine::draw() {
 
 	// request image from the swapchain
 	auto acquireResult = vkcommand::acquireNextImage(_swapchain, thisFrame()._presentSemaphore);
-	if (!acquireResult)
-		return new VulkanError(acquireResult.error()->getCode(), acquireResult.error(), ErrorMessage("Failed to get next image"));
+	if (!acquireResult) {
+		if (acquireResult.error()->isResizeError()) {
+			auto resizeResult = handleResize();
+			if (resizeResult.has_value())
+				return new Error(resizeResult.value(), ErrorMessage("Could not recreate swapchain here"));
+		} else
+			return new VulkanError(acquireResult.error()->getCode(), acquireResult.error(), ErrorMessage("Failed to get next image"));
+	}
 	uint32_t swapchainImageIndex = acquireResult.value();
 
 	// naming it cmd for shorter writing
@@ -204,7 +236,12 @@ std::optional<Error*> VulkanEngine::draw() {
 
 	operationResult = vkcommand::queuePresent(_graphicsQueue, presentInfo);
 	if (operationResult) {
-		return new VulkanError(operationResult.value()->getCode(), operationResult.value(), ErrorMessage("Error while presenting graphics queue"));
+		if (operationResult.value()->isResizeError()) {
+			auto resizeResult = handleResize();
+			if (resizeResult.has_value())
+				return new Error(resizeResult.value(), ErrorMessage("Could not recreate swapchain here"));
+		} else
+			return new VulkanError(operationResult.value()->getCode(), operationResult.value(), ErrorMessage("Error while presenting graphics queue"));
 	}
 
 	_frameNumber++;
@@ -220,6 +257,7 @@ std::optional<Error*> VulkanEngine::run() {
 	while (!shouldClose) {
 		std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
 		const float deltaSeconds = std::chrono::duration_cast<std::chrono::microseconds>(now - lastTime).count() * 1e-6;
+		_time = std::chrono::duration_cast<std::chrono::microseconds>(now - _start_time).count() * 1e-6;
 
 		// Update physics' objects
 		PhysicsMan.update(deltaSeconds);
@@ -405,7 +443,7 @@ tl::expected<int, Error*> VulkanEngine::initSwapchain() {
 
 	_swachainImageFormat = vkbSwapchain.image_format;
 
-	_onEngineShutdown.push_function([=]() {
+	_swapchainShutdown.push_function([=]() {
 		vkDestroySwapchainKHR(DeviceRef(), _swapchain, nullptr);
 	});
 
@@ -435,7 +473,7 @@ tl::expected<int, Error*> VulkanEngine::initSwapchain() {
 	_depthImageView = viewResult.value();
 
 	//add to deletion queues
-	_onEngineShutdown.push_function([=]() {
+	_swapchainShutdown.push_function([=]() {
 		vkDestroyImageView(DeviceRef(), _depthImageView, nullptr);
 		_depthImage.destroy();
 	});
@@ -557,7 +595,7 @@ tl::expected<int, Error*> VulkanEngine::initFramebuffers() {
 		VK_UNEXPECTED_ERROR(framebufferResult, "Failed to create framebuffer for a swapchain image {}", i);
 		_framebuffers[i] = framebufferResult.value();
 
-		_onEngineShutdown.push_function([=]() {
+		_swapchainShutdown.push_function([=]() {
 			vkDestroyFramebuffer(DeviceRef(), _framebuffers[i], nullptr);
 			vkDestroyImageView(DeviceRef(), _swapchainImageViews[i], nullptr);
 		});
@@ -626,6 +664,13 @@ tl::expected<int, Error*> VulkanEngine::initPipelines() {
 		return tl::unexpected(new Error(shaderResult.error(), ErrorMessage("Error when building the colored mesh shader")));
 	}
 	texturedMeshShader = shaderResult.value();
+
+	VkShaderModule meshVertAnimShader;
+	shaderResult = load_shader_module("../shaders/bin/tri_mesh_ssbo_vertex.vert.spv");
+	if (!shaderResult) {
+		return tl::unexpected(new Error(shaderResult.error(), ErrorMessage("Error when building the mesh vertex shader module")));
+	}
+	meshVertAnimShader = shaderResult.value();
 
 	VkShaderModule meshVertShader;
 	shaderResult = load_shader_module("../shaders/bin/tri_mesh_ssbo.vert.spv");
@@ -699,16 +744,34 @@ tl::expected<int, Error*> VulkanEngine::initPipelines() {
 
 	_scene->addMaterial(texPipeline, texturedPipeLayout, "texturedmesh");
 
+	pipelineBuilder
+		.removeShaders()
+		.addVertexShader(meshVertAnimShader)
+		.addFragmentShader(texturedMeshShader);
+
+	pipeResult = pipelineBuilder.setLayout(texturedSetLayouts, pushConstants);
+	VK_UNEXPECTED_ERROR(pipeResult, "Failed to create texture pipe layout")
+	VkPipelineLayout texturedAnimPipeLayout = pipeResult.value();
+
+	pipelineBuild = pipelineBuilder.build_pipeline(DeviceRef(), _renderPass);
+	VK_UNEXPECTED_ERROR(pipelineBuild, "Failed to build texturedmesh pipeline")
+	VkPipeline texAnimPipeline = pipelineBuild.value();
+
+	_scene->addMaterial(texAnimPipeline, texturedAnimPipeLayout, "texturedanimmesh");
+
 	vkDestroyShaderModule(DeviceRef(), meshVertShader, nullptr);
+	vkDestroyShaderModule(DeviceRef(), meshVertAnimShader, nullptr);
 	vkDestroyShaderModule(DeviceRef(), colorMeshShader, nullptr);
 	vkDestroyShaderModule(DeviceRef(), texturedMeshShader, nullptr);
 
 	_onEngineShutdown.push_function([=]() {
 		vkDestroyPipeline(DeviceRef(), meshPipeline, nullptr);
 		vkDestroyPipeline(DeviceRef(), texPipeline, nullptr);
+		vkDestroyPipeline(DeviceRef(), texAnimPipeline, nullptr);
 
 		vkDestroyPipelineLayout(DeviceRef(), meshPipLayout, nullptr);
 		vkDestroyPipelineLayout(DeviceRef(), texturedPipeLayout, nullptr);
+		vkDestroyPipelineLayout(DeviceRef(), texturedAnimPipeLayout, nullptr);
 	});
 
 	return 0;
@@ -869,6 +932,7 @@ std::optional<VulkanError*> VulkanEngine::draw_objects(VkCommandBuffer cmd) {
 			glm::mat4 mesh_matrix = model;
 
 			MeshPushConstants constants;
+			constants.data.x = _time;
 			constants.render_matrix = mesh_matrix;
 
 			//upload the mesh to the gpu via pushconstants

@@ -24,6 +24,7 @@ private:
     int addVertex(Vertex p) {
         Vertex pos;
         pos.position = glm::normalize(p.position);
+        pos.normal = glm::normalize(pos.position);
         geometry._vertices.push_back(pos);
         return index++;
     }

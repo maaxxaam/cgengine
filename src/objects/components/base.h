@@ -4,6 +4,7 @@
 
 class ComponentBase {
 public:
+    ComponentBase(Object &self): _self(self) {};
     ComponentBase(const Object &self): _self(self) {};
 
     Object getObject() { return _self; };

@@ -20,12 +20,15 @@ public:
     
     // Hierarchy helpers
     MaybeError setParent(Object parentTarget);
+    entt::entity getParent() { return _parentId; };
+    bool hasRootParent() { return _parentId == entt::null; };
 
 	bool hasChild(Object childTarget);
     MaybeError addChild(Object childTarget);
     MaybeError removeChild(Object childTarget);
 
     // Get different children as vectors
+    entityList getChildren() { return children; };
     entityList allChildren();
     entityList leafChildren();
 
