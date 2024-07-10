@@ -63,6 +63,7 @@ endfunction()
 
 add_vk_project(pong)
 add_vk_project(planets)
+add_vk_project(katamari)
 
 find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VULKAN_SDK}/Bin/ $ENV{VULKAN_SDK}/Bin32/)
 

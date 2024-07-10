@@ -1,5 +1,6 @@
 /build
 /bin
+/shaders/bin
 /CMakeFiles
 /*.cmake
 /CMakeCache.txt
@@ -8,6 +9,7 @@
 /Makefile
 /_deps
 /third_party/CMakeCache.txt
+/third_party/Makefile
 /third_party/CMakeFiles/
 /third_party/_deps/
 /third_party/*.a

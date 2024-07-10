@@ -2,6 +2,7 @@
 
 #include "src/error.h"
 #include "src/scene.h"
+#include "src/watchptr.h"
 #include "Orbit.h"
 
 class PlanetScene: public Scene {
@@ -12,7 +13,7 @@ public:
     virtual tl::expected<int, Error*> init(VulkanEngine *engine) override;
 
 private:
-    Camera* _camera;
+    watch_ptr<Camera> _camera;
     Object _sphere;
 
     tl::expected<int, Error*> loadMeshes(VulkanEngine* engine) override;

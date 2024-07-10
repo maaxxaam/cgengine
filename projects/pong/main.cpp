@@ -30,5 +30,7 @@ int main(int argc, char* argv[]) {
 	
 	engine.cleanup();	
 
+	PhysicsMan.destroy();
+
 	return 0;
 }

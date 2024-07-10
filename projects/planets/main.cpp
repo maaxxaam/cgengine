@@ -9,6 +9,9 @@ int main(int argc, char* argv[]) {
 	PlanetScene scene;
 	engine.setScene(&scene);
 
+	// Important!
+	Physics::prepareJolt();
+
 	auto init = engine.init();
 
 	if (init.has_value()) {
@@ -25,6 +28,8 @@ int main(int argc, char* argv[]) {
 	}
 	
 	engine.cleanup();	
+
+	PhysicsMan.destroy();
 
 	return 0;
 }

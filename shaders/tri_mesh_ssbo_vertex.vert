@@ -35,8 +35,18 @@ void main() {
 	float sec = PushConstants.data.x;
 	// gl_Position = transformMatrix * vec4(vPosition, 1.0f);
 	outColor = vColor;
+	vec2 texOut = vec2((vPosition.x - floor(vPosition.x)), (vPosition.y - floor(vPosition.y)));
+	vec3 outPos = vPosition;
+	// for(float i = 1.0; i < 8.0; i++) {
+    	// texOut.x += i * .1 / i * sin(texOut.x * i * i + sec * 0.5) * sin(texOut.y * i * i + sec * 0.5);
+    	// outPos.z += i * .2 / i * sin(outPos.y * i * i + sec * 0.5) * cos(outPos.x * i * i + sec * 0.5);
+        // outPos.z += sin(sec);
+  	// }
+    float k = 2. * 3.1415 / 50.f;
+    float a = 3.f;
+    outPos.z = a * sin(k * (outPos.x - 10.f * sec));
 
 	// outColor = (vNormal + vec3(1.0f, 1.0f, 1.0f)) / 2.0f;
-	texCoord = vTexCoord;
-	gl_Position = transformMatrix * vec4(vPosition, 1.f);
+	texCoord = texOut;
+	gl_Position = transformMatrix * vec4(outPos, 1.f);
 }
