@@ -1,9 +1,6 @@
-﻿# CMakeList.txt : CMake project for vulkan_guide, include source and define
-# project specific logic here.
-#
-cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required (VERSION 3.8)
 
-project ("vulkan_guide")
+project ("cgengine")
 
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -fuse-ld=mold")
 
@@ -13,6 +10,8 @@ find_package(Vulkan REQUIRED)
 find_package(fmt REQUIRED)
 
 add_subdirectory(third_party)
+
+add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
