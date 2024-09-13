@@ -20,9 +20,6 @@ add_library(stb_image INTERFACE)
 
 add_library(tinyobjloader STATIC)
 
-add_library(EASTL INTERFACE)
-target_include_directories(EASTL INTERFACE eastl)
-
 add_library(expected INTERFACE)
 target_sources(expected PUBLIC
   expected/include/tl/expected.hpp
