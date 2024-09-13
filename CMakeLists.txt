@@ -37,6 +37,7 @@ target_link_libraries(engine_src
       expected
       fmt::fmt
       Jolt
+      EnTT::EnTT
  )
 
  target_include_directories(engine_src PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

@@ -4,9 +4,9 @@ find_package(Vulkan REQUIRED)
 
 include(FetchContent)
 
-add_library(entt INTERFACE)
-target_include_directories(entt INTERFACE entt)
-target_link_libraries(entt INTERFACE EnTT::EnTT)
+# add_library(entt INTERFACE)
+add_subdirectory(entt)
+# target_link_libraries(entt INTERFACE EnTT::EnTT)
 
 add_library(vkbootstrap STATIC)
 add_library(vma  INTERFACE)
