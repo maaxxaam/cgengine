@@ -19,7 +19,9 @@
  */
 
 #include <GLFW/glfw3.h>
-#include <spdlog/spdlog.h>
+// #include <spdlog/spdlog.h>
+
+#include <stdexcept>
 
 #include "platform.h"
 
@@ -30,7 +32,7 @@ Platform::Platform() {
 }
 
 void Platform::init() {
-	spdlog::info("GLFW Info: {}", glfwGetVersionString());
+	// spdlog::info("GLFW Info: {}", glfwGetVersionString());
 
 	int result = glfwInit();
 	if (result == GLFW_FALSE)
@@ -50,7 +52,7 @@ void Platform::update() {
 }
 
 void Platform::errorCallback(int code, const char *description) {
-	spdlog::error("GLFW Error {}: {}", code, description);
+	// spdlog::error("GLFW Error {}: {}", code, description);
 }
 
 }

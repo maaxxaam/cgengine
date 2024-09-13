@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 find_package(Vulkan REQUIRED)
-find_package(glfw3 REQUIRED)
 
 include(FetchContent)
 
@@ -13,10 +12,16 @@ add_library(vkbootstrap STATIC)
 add_library(vma  INTERFACE)
 add_library(glm INTERFACE)
 add_library(JoltPH INTERFACE)
+add_subdirectory(glfw)
+add_subdirectory(fmt)
+# add_subdirectory(spdlog)
 
 add_library(stb_image INTERFACE)
 
 add_library(tinyobjloader STATIC)
+
+add_library(EASTL INTERFACE)
+target_include_directories(EASTL INTERFACE eastl)
 
 add_library(expected INTERFACE)
 target_sources(expected PUBLIC
@@ -43,8 +48,6 @@ target_sources(tinyobjloader PRIVATE
   )
 
 target_include_directories(tinyobjloader PUBLIC tinyobjloader)
-
-target_link_libraries(glfw)
 
 add_library(imgui STATIC)
 

@@ -21,7 +21,7 @@
 #include <stdexcept>
 #include <optional>
 
-#include <spdlog/spdlog.h>
+// #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 
 #include "expected.hpp"
@@ -192,7 +192,7 @@ void Window::setMouseCursorVisible(bool visible) {
 
 void Window::setRawMouseMotion(bool enabled) {
 	if (!glfwRawMouseMotionSupported()) {
-		spdlog::warn("Raw mouse motion is not supported");
+		// spdlog::warn("Raw mouse motion is not supported");
 		return;
 	}
 	

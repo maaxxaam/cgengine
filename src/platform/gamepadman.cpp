@@ -18,7 +18,7 @@
  * along with OpenAWE. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <spdlog/spdlog.h>
+//#include <spdlog/spdlog.h>
 #include <glm/glm.hpp>
 
 #include "gamepadman.h"
@@ -36,12 +36,12 @@ void GamepadManager::callbackJoystickConnectionChanged(int jid, int event) {
     if (event == GLFW_CONNECTED) {
         if (!GamepadMan._activeGamepadId && glfwJoystickIsGamepad(jid)) {
             GamepadMan.setActiveGamepad(jid);
-            spdlog::debug("Gamepad {} with id {} has been connected", GamepadMan.getActiveGamepadName().value(), jid);
+            //spdlog::debug("Gamepad {} with id {} has been connected", GamepadMan.getActiveGamepadName().value(), jid);
         }
     } else if (event == GLFW_DISCONNECTED) {
         if (GamepadMan._activeGamepadId == jid) {
             GamepadMan._activeGamepadId = {};
-            spdlog::debug("Gamepad with id {} has been disconnected", jid);
+            //spdlog::debug("Gamepad with id {} has been disconnected", jid);
             GamepadMan.searchForActiveGamepad();
         }
     }
@@ -61,7 +61,7 @@ void GamepadManager::searchForActiveGamepad() {
     for (int gid = 0; gid < GLFW_JOYSTICK_LAST; gid++) {
         if (glfwJoystickIsGamepad(gid)) {
             setActiveGamepad(gid);
-            spdlog::debug("Found connected gamepad {} with id {} to use", getActiveGamepadName().value(), gid);
+            //spdlog::debug("Found connected gamepad {} with id {} to use", getActiveGamepadName().value(), gid);
             break;
         }
     }

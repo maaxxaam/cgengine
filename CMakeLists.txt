@@ -6,7 +6,6 @@ SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -fuse-ld=mold")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Vulkan REQUIRED)
-find_package(fmt REQUIRED)
 
 add_subdirectory(third_party)
 
@@ -36,7 +35,7 @@ target_link_libraries(engine_src
       imgui 
       stb_image
       expected
-      fmt
+      fmt::fmt
       Jolt
  )
 
