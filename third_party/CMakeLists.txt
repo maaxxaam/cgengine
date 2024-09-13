@@ -62,7 +62,7 @@ target_sources(imgui PRIVATE
   imgui/backends/imgui_impl_glfw.cpp
   )
 
-target_link_libraries(imgui PUBLIC Vulkan::Vulkan)
+target_link_libraries(imgui PUBLIC Vulkan::Vulkan glfw)
 
 target_include_directories(stb_image INTERFACE stb)
 
