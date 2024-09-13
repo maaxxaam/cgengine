@@ -5,8 +5,6 @@ project ("cgengine")
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -fuse-ld=mold")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-include_directories(${BULLET_INCLUDE_DIR})
-
 find_package(Vulkan REQUIRED)
 find_package(fmt REQUIRED)
 
