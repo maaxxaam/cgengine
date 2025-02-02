@@ -1,7 +1,9 @@
 #pragma once
 
-#include <deque>
 #include <functional>
+
+#include "eastloverloads.h"
+#include <EASTL/deque.h>
 
 using delFunc = std::function<void()>;
 
@@ -12,5 +14,5 @@ public:
 
     void flush();
 private:
-    std::deque<delFunc> deletors;
+    eastl::deque<delFunc> deletors;
 };

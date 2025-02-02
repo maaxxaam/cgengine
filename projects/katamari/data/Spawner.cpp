@@ -9,7 +9,7 @@ void Spawner::spawn() {
 
     glm::mat4 transformMatrix = glm::translate(glm::mat4{1.0f}, glm::vec3(x, y, z));
 
-    std::string name = items[_index];
+    eastl::string name = items[_index];
     _index = (_index + 1) % 3;
     fmt::println("New obj {}: {} {} {}", name, x, y, z);
 

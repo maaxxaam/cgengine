@@ -3,7 +3,8 @@
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
 
-#include <vector>
+#include "eastloverloads.h"
+#include <EASTL/vector.h>
 
 #include "allocstructs.h"
 #include "error.h"
@@ -24,7 +25,7 @@ struct Vertex {
 }; 
 
 struct Mesh {
-	std::vector<Vertex> _vertices;
+	eastl::vector<Vertex> _vertices;
 
 	AllocatedBuffer _vertexBuffer;
 };

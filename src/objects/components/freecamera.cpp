@@ -33,7 +33,7 @@ FreeCamera& FreeCamera::operator=(FreeCamera &&other) {
 }
 
 void FreeCamera::initListener() {
-    std::string name = "FREECAM";
+    eastl::string name = "FREECAM";
     if (_self.hasComponent<TagComponent>()) {
         name += "_";
         name += _self.getComponent<TagComponent>()->getName();

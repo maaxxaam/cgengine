@@ -106,7 +106,7 @@ VkRenderPassBeginInfo vkinit::renderpass_begin_info(VkRenderPass renderPass, VkE
 	};
 }
 
-VkShaderModuleCreateInfo vkinit::createinfo::shaderModule(std::vector<uint32_t>& moduleBinary) {
+VkShaderModuleCreateInfo vkinit::createinfo::shaderModule(eastl::vector<uint32_t>& moduleBinary) {
 	return VkShaderModuleCreateInfo {
 		.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
 		.pNext = nullptr,

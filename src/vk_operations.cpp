@@ -35,8 +35,8 @@ tl::expected<uint32_t, VulkanError*> acquireNextImage(VkSwapchainKHR swapchain, 
     return result;
 }
 
-tl::expected<std::vector<VkDescriptorSet>, VulkanError*> allocateDescriptorSets(const VkDescriptorSetAllocateInfo *pAllocateInfo) {
-    std::vector<VkDescriptorSet> result;
+tl::expected<eastl::vector<VkDescriptorSet>, VulkanError*> allocateDescriptorSets(const VkDescriptorSetAllocateInfo *pAllocateInfo) {
+    eastl::vector<VkDescriptorSet> result;
     result.resize(pAllocateInfo->descriptorSetCount);
     VkResult operationResult = vkAllocateDescriptorSets(DeviceRef(), pAllocateInfo, result.data());
 

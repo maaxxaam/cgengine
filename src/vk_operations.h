@@ -10,7 +10,7 @@
 namespace vkcommand {
     tl::expected<uint32_t, VulkanError*> acquireNextImage(VkSwapchainKHR swapchain, VkSemaphore semaphore);
 
-    tl::expected<std::vector<VkDescriptorSet>, VulkanError*> allocateDescriptorSets(const VkDescriptorSetAllocateInfo *pAllocateInfo);
+    tl::expected<eastl::vector<VkDescriptorSet>, VulkanError*> allocateDescriptorSets(const VkDescriptorSetAllocateInfo *pAllocateInfo);
 
     tl::expected<VkDescriptorSet, VulkanError*> allocateDescriptorSet(VkDescriptorPool pool, VkDescriptorSetLayout layout);
 

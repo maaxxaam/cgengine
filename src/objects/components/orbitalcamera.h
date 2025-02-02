@@ -32,7 +32,7 @@ private:
     const float _orbitRadiusBase = 10.f;
 
     // Event references
-    std::string _rotateMouseStr, _rotateLeftStr, _rotateRightStr, _rotateUpStr, _rotateDownStr;
+    eastl::string _rotateMouseStr, _rotateLeftStr, _rotateRightStr, _rotateUpStr, _rotateDownStr;
     uint32_t _rotateMouseHash, _rotateLeftHash, _rotateRightHash, _rotateUpHash, _rotateDownHash;
 
     bool _clearRotation;

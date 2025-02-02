@@ -4,31 +4,33 @@
 #include <fmt/format.h>
 #include <expected.hpp>
 
-#include <string>
 #include <optional>
-#include <vector>
+
+#include "eastloverloads.h"
+#include <EASTL/string.h>
+#include <EASTL/vector.h>
 
 class Error {
 public:
-    Error(const std::string errorMessage): _message(errorMessage) {};
-    Error(Error *error, const std::string extraErrorMessage): _nextInChain(error), _message(extraErrorMessage) {};
+    Error(const eastl::string errorMessage): _message(errorMessage) {};
+    Error(Error *error, const eastl::string extraErrorMessage): _nextInChain(error), _message(extraErrorMessage) {};
     ~Error();
     
-    const std::string what();
+    const eastl::string what();
 private:
     Error *const _nextInChain = nullptr;
-    const std::string _message;
+    const eastl::string _message;
 };
 
 using MaybeError = std::optional<Error *>;
-using MaybeMultipleErrors = std::optional<std::vector<Error *>>;
+using MaybeMultipleErrors = std::optional<eastl::vector<Error *>>;
 
-#define ErrorMessage(...) fmt::format("{}:{}| {}", __FILE__, __LINE__, fmt::format(__VA_ARGS__))
+#define ErrorMessage(...) fmt::format("{}:{}| {}", __FILE__, __LINE__, fmt::format(__VA_ARGS__)).c_str()
 
 class VulkanError: public Error {
 public:
-    VulkanError(const VkResult errorCode, const std::string errorMessage);
-    VulkanError(const VkResult errorCode, Error *error, const std::string extraErrorMessage);
+    VulkanError(const VkResult errorCode, const eastl::string errorMessage);
+    VulkanError(const VkResult errorCode, Error *error, const eastl::string extraErrorMessage);
 
     const VkResult getCode() const { return _errorCode; };
     bool isResizeError() const;
@@ -63,8 +65,8 @@ using MaybeVulkanError = std::optional<VulkanError*>;
 
 class FileError: public Error {
 public:
-    FileError(const int errorCode, const std::string errorMessage);
-    FileError(const int errorCode, Error *error, const std::string extraErrorMessage);
+    FileError(const int errorCode, const eastl::string errorMessage);
+    FileError(const int errorCode, Error *error, const eastl::string extraErrorMessage);
 private:
     const unsigned int _errorCode;
 };

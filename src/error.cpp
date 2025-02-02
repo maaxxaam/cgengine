@@ -4,8 +4,8 @@ Error::~Error() {
     if (_nextInChain != nullptr) delete _nextInChain;
 }
 
-const std::string Error::what() {
-    std::string result = _message;
+const eastl::string Error::what() {
+    eastl::string result = _message;
     Error *next = _nextInChain;
     while (next != nullptr) {
         result.append("\n");
@@ -15,11 +15,11 @@ const std::string Error::what() {
     return result;
 }
 
-VulkanError::VulkanError(const VkResult errorCode, const std::string errorMessage): 
-    _errorCode(errorCode), Error(errorMessage + fmt::format(" (Vulkan error code {})", (int)errorCode)) {}
+VulkanError::VulkanError(const VkResult errorCode, const eastl::string errorMessage): 
+    _errorCode(errorCode), Error(errorMessage + fmt::format(" (Vulkan error code {})", (int)errorCode).c_str()) {}
 
-VulkanError::VulkanError(const VkResult errorCode, Error *error, const std::string extraErrorMessage): 
-    _errorCode(errorCode), Error(error, extraErrorMessage + fmt::format(" (Vulkan error code {})", (int)errorCode)) {}
+VulkanError::VulkanError(const VkResult errorCode, Error *error, const eastl::string extraErrorMessage): 
+    _errorCode(errorCode), Error(error, extraErrorMessage + fmt::format(" (Vulkan error code {})", (int)errorCode).c_str()) {}
 
 bool VulkanError::isResizeError() const {
     switch (_errorCode) {
@@ -32,8 +32,8 @@ bool VulkanError::isResizeError() const {
     }
 }
 
-FileError::FileError(const int errorCode, const std::string errorMessage): 
-    _errorCode(errorCode), Error(errorMessage + fmt::format(" (File error code {})", errorCode)) {}
+FileError::FileError(const int errorCode, const eastl::string errorMessage): 
+    _errorCode(errorCode), Error(errorMessage + fmt::format(" (File error code {})", errorCode).c_str()) {}
 
-FileError::FileError(const int errorCode, Error *error, const std::string extraErrorMessage): 
-    _errorCode(errorCode), Error(error, extraErrorMessage + fmt::format(" (File error code {})", errorCode)) {}
+FileError::FileError(const int errorCode, Error *error, const eastl::string extraErrorMessage): 
+    _errorCode(errorCode), Error(error, extraErrorMessage + fmt::format(" (File error code {})", errorCode).c_str()) {}

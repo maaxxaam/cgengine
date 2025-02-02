@@ -5,8 +5,10 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include "eastloverloads.h"
+#include <EASTL/vector.h>
+
 #include <cstdint>
-#include <vector>
 
 namespace vkinit {
 	namespace createinfo {
@@ -24,7 +26,7 @@ namespace vkinit {
 
 		VkFramebufferCreateInfo framebuffer(VkRenderPass renderPass, VkExtent2D extent);
 
-		VkShaderModuleCreateInfo shaderModule(std::vector<uint32_t>& moduleBinary);
+		VkShaderModuleCreateInfo shaderModule(eastl::vector<uint32_t>& moduleBinary);
 	}
 
 	VkCommandBufferAllocateInfo command_buffer_allocate_info(VkCommandPool pool, uint32_t count = 1, VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);

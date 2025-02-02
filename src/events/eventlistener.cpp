@@ -33,7 +33,7 @@ void EventListener::bindCallbacks() {
 void EventListener::addActionCallback(const std::initializer_list<uint32_t>& actions, EventCallback& callback) {
 	EventCallback* callAddress = &callback;
 	for (const auto &action: actions) {
-		_listenerCallbacks.insert(std::make_pair(action, callAddress));
+		_listenerCallbacks.insert(eastl::make_pair(action, callAddress));
 	}
 }
 

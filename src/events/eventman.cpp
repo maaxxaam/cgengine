@@ -39,7 +39,7 @@ inline void EventManager::invokeCallbacks(const EventData data, const uint32_t a
 
 void EventManager::injectKeyboardInput(const Events::Key key, const Events::KeyState state, const uint32_t modifiers) {
 	fmt::println("Key inject code: {}", static_cast<int>(key));
-	KeyCombination combination = std::make_pair(key, modifiers);
+	KeyCombination combination = eastl::make_pair(key, modifiers);
 	const auto action = _keyBindings.map()->find(combination);
 	if (action == _keyBindings.map()->cend()) return;
 
@@ -92,7 +92,7 @@ EventCallback* EventManager::setActionCallback(const std::initializer_list<uint3
 	EventCallback* callAddress = &callback;
 	for (const auto &action: actions) {
 		// (*callAddress)(Event{action, KeyEvent{ Events::kPress }});
-		_actionCallbacks.insert(std::make_pair(action, callback));
+		_actionCallbacks.insert(eastl::make_pair(action, callback));
 	}
 
 	return callAddress;
@@ -111,44 +111,44 @@ void EventManager::removeActionCallback(const uint32_t& action, const EventCallb
 	// TODO: not working, need a rewrite (maybe)
 }
 
-const uint32_t EventManager::addBinding(const std::string& action, const Key& key) {
-	return _keyBindings.insert(std::make_pair(key, kNoModifier), action);
+const uint32_t EventManager::addBinding(const eastl::string& action, const Key& key) {
+	return _keyBindings.insert(eastl::make_pair(key, kNoModifier), action);
 }
 
-const uint32_t EventManager::addBinding(const std::string& action, const Key& key, const uint32_t& modifiers) {
-	return _keyBindings.insert(std::make_pair(key, modifiers), action);
+const uint32_t EventManager::addBinding(const eastl::string& action, const Key& key, const uint32_t& modifiers) {
+	return _keyBindings.insert(eastl::make_pair(key, modifiers), action);
 }
 
-const uint32_t EventManager::addBinding(const std::string& action, const MouseButton& mouse) {
+const uint32_t EventManager::addBinding(const eastl::string& action, const MouseButton& mouse) {
 	return _mouseBindings.insert(mouse, action);
 }
 
-const uint32_t EventManager::addBinding(const std::string& action, const GamepadButton& button) {
+const uint32_t EventManager::addBinding(const eastl::string& action, const GamepadButton& button) {
 	return _gamepadBindings.insert(button, action);
 }
 
-const uint32_t EventManager::add2DAxisBinding(const std::string& action, const Mouse2DAxis& axis) {
+const uint32_t EventManager::add2DAxisBinding(const eastl::string& action, const Mouse2DAxis& axis) {
 	return _mouse2DAxisBindings.insert(axis, action);
 }
 
-const uint32_t EventManager::add1DAxisBinding(const std::string& action, const Mouse1DAxis& axis) {
+const uint32_t EventManager::add1DAxisBinding(const eastl::string& action, const Mouse1DAxis& axis) {
 	return _mouse1DAxisBindings.insert(axis, action);
 }
 
-const uint32_t EventManager::add2DAxisBinding(const std::string& action, const Gamepad2DAxis& axis) {
+const uint32_t EventManager::add2DAxisBinding(const eastl::string& action, const Gamepad2DAxis& axis) {
 	return _gamepad2DAxisBindings.insert(axis, action);
 }
 
-const uint32_t EventManager::add1DAxisBinding(const std::string& action, const Gamepad1DAxis& axis) {
+const uint32_t EventManager::add1DAxisBinding(const eastl::string& action, const Gamepad1DAxis& axis) {
 	return _gamepad1DAxisBindings.insert(axis, action);
 }
 
 void EventManager::removeBinding(const Key& key) {
-	_keyBindings.remove(std::make_pair(key, kNoModifier));
+	_keyBindings.remove(eastl::make_pair(key, kNoModifier));
 }
 
 void EventManager::removeBinding(const Key& key, const KeyModifier& modifier) {
-	_keyBindings.remove(std::make_pair(key, modifier));
+	_keyBindings.remove(eastl::make_pair(key, modifier));
 }
 
 void EventManager::removeBinding(const MouseButton& button) {
@@ -175,11 +175,11 @@ void EventManager::remove2DAxisBinding(const Mouse2DAxis& axes) {
 	_mouse2DAxisBindings.remove(axes);
 }
 
-std::pair<EventManager::ActionMap<KeyCombination>::constIter, EventManager::ActionMap<KeyCombination>::constIter> EventManager::getKeyBindings() { return _keyBindings.actionBindings(); }
+eastl::pair<EventManager::ActionMap<KeyCombination>::constIter, EventManager::ActionMap<KeyCombination>::constIter> EventManager::getKeyBindings() { return _keyBindings.actionBindings(); }
 
-std::pair<EventManager::ActionMap<MouseButton>::constIter, EventManager::ActionMap<MouseButton>::constIter> EventManager::getMouseKeyBindings() { return _mouseBindings.actionBindings(); }
+eastl::pair<EventManager::ActionMap<MouseButton>::constIter, EventManager::ActionMap<MouseButton>::constIter> EventManager::getMouseKeyBindings() { return _mouseBindings.actionBindings(); }
 
-tl::expected<const std::string, Error*> EventManager::getActionName(const uint32_t &actionHash) const {
+tl::expected<const eastl::string, Error*> EventManager::getActionName(const uint32_t &actionHash) const {
 	if (_keyBindings.nameMapping()->find(actionHash) != _keyBindings.nameMapping()->cend()) {
 		return _keyBindings.nameMapping()->at(actionHash);
 	}

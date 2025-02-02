@@ -433,13 +433,13 @@ tl::expected<int, Error*> VulkanEngine::initSwapchain() {
 	if (!swapchainImagesResult.has_value()) {
 		return tl::unexpected(new Error(ErrorMessage(swapchainImagesResult.error().message())));
 	}
-	_swapchainImages = swapchainImagesResult.value();
+	eastl::copy(swapchainImagesResult.value().begin(), swapchainImagesResult.value().end(), eastl::back_inserter(_swapchainImages));
 
 	auto swapchainImageViewsResult = vkbSwapchain.get_image_views();
 	if (!swapchainImageViewsResult.has_value()) {
 		return tl::unexpected(new Error(ErrorMessage(swapchainImageViewsResult.error().message())));
 	}
-	_swapchainImageViews = swapchainImageViewsResult.value();
+	eastl::copy(swapchainImageViewsResult.value().begin(), swapchainImageViewsResult.value().end(), eastl::back_inserter(_swapchainImageViews));
 
 	_swachainImageFormat = vkbSwapchain.image_format;
 
@@ -581,7 +581,7 @@ tl::expected<int, Error*> VulkanEngine::initFramebuffers() {
 	VkFramebufferCreateInfo fb_info = vkinit::createinfo::framebuffer(_renderPass, _windowExtent);
 
 	const uint32_t swapchain_imagecount = _swapchainImages.size();
-	_framebuffers = std::vector<VkFramebuffer>(swapchain_imagecount);
+	_framebuffers = eastl::vector<VkFramebuffer>(swapchain_imagecount);
 
 	for (int i = 0; i < swapchain_imagecount; i++) {
 
@@ -682,7 +682,7 @@ tl::expected<int, Error*> VulkanEngine::initPipelines() {
 	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader modules per stage
 	PipelineBuilder pipelineBuilder;
 
-	std::vector<VkPushConstantRange> pushConstants { {
+	eastl::vector<VkPushConstantRange> pushConstants { {
 		.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
 		.offset = 0,
 		.size = sizeof(MeshPushConstants)
@@ -714,7 +714,7 @@ tl::expected<int, Error*> VulkanEngine::initPipelines() {
 		.addVertexShader(meshVertShader)
 		.addFragmentShader(colorMeshShader);
 	
-	std::vector<VkDescriptorSetLayout> setLayouts = { _globalSetLayout, _objectSetLayout };
+	eastl::vector<VkDescriptorSetLayout> setLayouts = { _globalSetLayout, _objectSetLayout };
 
 	auto pipeResult = pipelineBuilder.setLayout(setLayouts, pushConstants);
 	VK_UNEXPECTED_ERROR(pipeResult, "Failed to create texture pipe layout")
@@ -732,7 +732,7 @@ tl::expected<int, Error*> VulkanEngine::initPipelines() {
 		.addVertexShader(meshVertShader)
 		.addFragmentShader(texturedMeshShader);
 
-	std::vector<VkDescriptorSetLayout> texturedSetLayouts = { _globalSetLayout, _objectSetLayout,_singleTextureSetLayout };
+	eastl::vector<VkDescriptorSetLayout> texturedSetLayouts = { _globalSetLayout, _objectSetLayout,_singleTextureSetLayout };
 
 	pipeResult = pipelineBuilder.setLayout(texturedSetLayouts, pushConstants);
 	VK_UNEXPECTED_ERROR(pipeResult, "Failed to create texture pipe layout")
@@ -791,7 +791,7 @@ tl::expected<VkShaderModule, Error*> VulkanEngine::load_shader_module(const char
 	size_t fileSize = (size_t)file.tellg();
 
 	// SPIRV expects the buffer to be on uint32, so make sure to reserve a int vector big enough for the entire file
-	std::vector<uint32_t> buffer(fileSize / sizeof(uint32_t));
+	eastl::vector<uint32_t> buffer(fileSize / sizeof(uint32_t));
 
 	// Put file cursor at beggining and load the entire file into the buffer
 	file.seekg(0).read((char*)buffer.data(), fileSize);

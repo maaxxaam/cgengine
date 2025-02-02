@@ -23,7 +23,8 @@
 
 #include <cstdint>
 
-#include <string_view>
+#include "eastloverloads.h"
+#include <EASTL/string.h>
 
 namespace Common {
 
@@ -82,7 +83,7 @@ static constexpr uint32_t kCRC32Table[] = {
  * \param data The string to calculate the hash for
  * \return The hash caculated from the given string
  */
-constexpr uint32_t crc32(const std::string_view &data) {
+constexpr uint32_t crc32(const eastl::string_view &data) {
 	uint32_t hash = 0xFFFFFFFF;
 
 	for (char date : data) {

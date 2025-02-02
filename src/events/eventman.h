@@ -22,10 +22,11 @@
 #define OPENAWE_EVENTMAN_H
 
 #include <cstdint>
-#include <map>
-#include <optional>
-#include <bitset>
 #include <functional>
+
+#include "eastloverloads.h"
+#include <EASTL/map.h>
+#include <EASTL/string.h>
 
 #include "src/singleton.h"
 #include "src/crc32.h"
@@ -39,7 +40,7 @@
 namespace Events {
 
 typedef std::function<void(const Event &event)> EventCallback;
-typedef std::pair<Key, uint32_t> KeyCombination;
+typedef eastl::pair<Key, uint32_t> KeyCombination;
 
 /*!
  * \brief Class for exchanging input
@@ -58,20 +59,20 @@ public:
 	template<typename T>
 	class ActionMap {
 	public:
-		typedef std::map<uint32_t, std::string> nameMap;
+		typedef eastl::map<uint32_t, eastl::string> nameMap;
 		typedef nameMap::const_iterator nameMapConstIter;
-		typedef std::map<T, uint32_t> actionMap;
+		typedef eastl::map<T, uint32_t> actionMap;
 		typedef typename actionMap::const_iterator constIter;
 
 		bool hasAction(const uint32_t &actionHash) const { return _actionNames.find(actionHash) != _actionNames.end(); };
-		const std::string actionNameFromHash(const uint32_t &actionHash) const { return _actionNames.at(actionHash); };
+		const eastl::string actionNameFromHash(const uint32_t &actionHash) const { return _actionNames.at(actionHash); };
 
-		uint32_t insert(const T &key, const std::string &action) { 
+		uint32_t insert(const T &key, const eastl::string &action) { 
 			const uint32_t actionHash = Common::crc32(action);
 			if (hasAction(actionHash)) return 0;
 
-			_map.insert(std::make_pair(key, actionHash)); 
-			_actionNames.insert(std::make_pair(actionHash, action));
+			_map.insert(eastl::make_pair(key, actionHash)); 
+			_actionNames.insert(eastl::make_pair(actionHash, action));
 
 			return actionHash;
 		};
@@ -81,8 +82,8 @@ public:
 			_map.erase(action);
 		};
 		
-		std::pair<nameMapConstIter, nameMapConstIter> actionNames() { return std::make_pair(_actionNames.cbegin(), _actionNames.cend()); }; 
-		std::pair<constIter, constIter> actionBindings() { return std::make_pair(_map.cbegin(), _map.cend()); }; 
+		eastl::pair<nameMapConstIter, nameMapConstIter> actionNames() { return eastl::make_pair(_actionNames.cbegin(), _actionNames.cend()); }; 
+		eastl::pair<constIter, constIter> actionBindings() { return eastl::make_pair(_map.cbegin(), _map.cend()); }; 
 
 		const actionMap* map() const { return &_map; };
 		const nameMap* nameMapping() const { return &_actionNames; };
@@ -160,56 +161,56 @@ public:
 	 * \param action The action for association with the key
 	 * \param key The key for association with the action
 	 */
-	const uint32_t addBinding(const std::string& action, const Key& key);
+	const uint32_t addBinding(const eastl::string& action, const Key& key);
 
 	/*!
 	 * Associate an action with a specific keyboard key combination
 	 * \param action The action for association with the key
 	 * \param key The key for association with the action
 	 */
-	const uint32_t addBinding(const std::string& action, const Key& key, const uint32_t& modifiers);
+	const uint32_t addBinding(const eastl::string& action, const Key& key, const uint32_t& modifiers);
 
 	/*!
 	 * Associate an action with a specific mouse key
 	 * \param action The action for association with the key
 	 * \param key The key for association with the action
 	 */
-	const uint32_t addBinding(const std::string& action, const MouseButton& mouse);
+	const uint32_t addBinding(const eastl::string& action, const MouseButton& mouse);
 
 	/*!
 	 * Associate an action with a specific gamepad buttpn
 	 * \param action The action for association with the button
 	 * \param key The button for association with the action
 	 */
-	const uint32_t addBinding(const std::string& action, const GamepadButton& button);
+	const uint32_t addBinding(const eastl::string& action, const GamepadButton& button);
 
 	/*!
 	 * Associate an action with 2D axis mouse movement
 	 * \param action The action for association
 	 * \param axis The axis for association with the action
 	 */
-	const uint32_t add2DAxisBinding(const std::string& action, const Mouse2DAxis& axis);
+	const uint32_t add2DAxisBinding(const eastl::string& action, const Mouse2DAxis& axis);
 
 	/*!
 	 * Associate an action with 1D axis mouse movement
 	 * \param action The action for association
 	 * \param axis The axis for association with the action
 	 */
-	const uint32_t add1DAxisBinding(const std::string& action, const Mouse1DAxis& axis);
+	const uint32_t add1DAxisBinding(const eastl::string& action, const Mouse1DAxis& axis);
 
 	/*!
 	 * Associate an action with 2D axis gamepad stick movement
 	 * \param action The action for association
 	 * \param axis The axis for association with the action
 	 */
-	const uint32_t add2DAxisBinding(const std::string& action, const Gamepad2DAxis& axis);
+	const uint32_t add2DAxisBinding(const eastl::string& action, const Gamepad2DAxis& axis);
 
 	/*!
 	 * Associate an action with 1D gamepad stick/trigger movement
 	 * \param action The action for association
 	 * \param axis The axis for association with the action
 	 */
-	const uint32_t add1DAxisBinding(const std::string& action, const Gamepad1DAxis& axis);
+	const uint32_t add1DAxisBinding(const eastl::string& action, const Gamepad1DAxis& axis);
 
 	void removeBinding(const Key& key);
 	void removeBinding(const Key& key, const KeyModifier& modifiers);
@@ -220,14 +221,14 @@ public:
 	void remove2DAxisBinding(const Gamepad2DAxis& axes);
 	void remove2DAxisBinding(const Mouse2DAxis& axes);
 
-	std::pair<ActionMap<KeyCombination>::constIter, ActionMap<KeyCombination>::constIter> getKeyBindings();
+	eastl::pair<ActionMap<KeyCombination>::constIter, ActionMap<KeyCombination>::constIter> getKeyBindings();
 
-	std::pair<ActionMap<MouseButton>::constIter, ActionMap<MouseButton>::constIter> getMouseKeyBindings();
+	eastl::pair<ActionMap<MouseButton>::constIter, ActionMap<MouseButton>::constIter> getMouseKeyBindings();
 
-	tl::expected<const std::string, Error*> getActionName(const uint32_t &actionHash) const;
+	tl::expected<const eastl::string, Error*> getActionName(const uint32_t &actionHash) const;
 
 private:
-	std::multimap<uint32_t, EventCallback> _actionCallbacks;
+	eastl::multimap<uint32_t, EventCallback> _actionCallbacks;
 
 	ActionMap<KeyCombination> _keyBindings;
 	ActionMap<MouseButton> _mouseBindings;

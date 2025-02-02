@@ -4,17 +4,16 @@ find_package(Vulkan REQUIRED)
 
 include(FetchContent)
 
-# add_library(entt INTERFACE)
 add_subdirectory(entt)
-# target_link_libraries(entt INTERFACE EnTT::EnTT)
 
 add_library(vkbootstrap STATIC)
-add_library(vma  INTERFACE)
+add_library(vma INTERFACE)
 add_library(glm INTERFACE)
 add_library(JoltPH INTERFACE)
+add_library(leaf INTERFACE)
 add_subdirectory(glfw)
 add_subdirectory(fmt)
-# add_subdirectory(spdlog)
+add_subdirectory(EASTL)
 
 add_library(stb_image INTERFACE)
 
@@ -38,6 +37,7 @@ target_link_libraries(vkbootstrap PUBLIC Vulkan::Vulkan $<$<BOOL:UNIX>:${CMAKE_D
 target_include_directories(vma INTERFACE vma/include)
 
 target_include_directories(glm INTERFACE glm)
+target_include_directories(leaf INTERFACE single_headers/leaf)
 
 target_sources(tinyobjloader PRIVATE 
   tinyobjloader/tiny_obj_loader.h

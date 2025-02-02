@@ -4,8 +4,10 @@
 
 #include <cmath>
 #include <cstdint>
-#include <vector>
-#include <map>
+
+#include "eastloverloads.h"
+#include <EASTL/vector.h>
+#include <EASTL/map.h>
 
 #include "src/vk_mesh.h"
 
@@ -15,8 +17,8 @@ public:
 
 private:
     Mesh geometry;
-    std::map<uint64_t, uint32_t> middlePointIndexCache;
-    std::vector<uint32_t> indices;
+    eastl::map<uint64_t, uint32_t> middlePointIndexCache;
+    eastl::vector<uint32_t> indices;
     int index;
     glm::vec3 vertexColor;
 

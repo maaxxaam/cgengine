@@ -58,7 +58,7 @@ Mesh SphereCreator::create(int recursionLevel) {
     // refine triangles
     for (int i = 0; i < recursionLevel; i++)
     {
-        std::vector<uint32_t> indices2;
+        eastl::vector<uint32_t> indices2;
         for (int i = 0; i < indices.size(); i += 3) {
             // replace triangle by 4 triangles
             uint32_t v1 = indices[i];

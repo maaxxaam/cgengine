@@ -40,7 +40,7 @@ OrbitalCamera& OrbitalCamera::operator=(OrbitalCamera &&other) {
 }
 
 void OrbitalCamera::initListener() {
-    std::string name = "ORBITCAM";
+    eastl::string name = "ORBITCAM";
     if (_self.hasComponent<TagComponent>()) {
         name += "_";
         name += _self.getComponent<TagComponent>()->getName();

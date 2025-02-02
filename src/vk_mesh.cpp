@@ -59,7 +59,9 @@ tl::expected<Mesh, Error*> meshFromOBJ(const char* fileName) {
 	}
 
 	tinyobj::attrib_t vertexArrays = reader.GetAttrib();
-	std::vector<tinyobj::shape_t> objectInfo = reader.GetShapes();
+	auto shapes = reader.GetShapes();
+	eastl::vector<tinyobj::shape_t> objectInfo(shapes.size());
+	eastl::copy(shapes.begin(), shapes.end(), eastl::back_inserter(objectInfo));
 	// materials contains the information about the material of each shape, not used yet.
 	// std::vector<tinyobj::material_t> materials = reader.GetMaterials();
 

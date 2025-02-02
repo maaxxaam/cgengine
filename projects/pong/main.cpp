@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 	auto init = engine.init();
 
 	if (init.has_value()) {
-		std::cerr << "Engine initialization failed:\n" << init.value()->what() << "\n";
+		std::cerr << fmt::format("Engine initialization failed:\n{}\n", init.value()->what());
 		delete init.value();
 		return 1;
 	}
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
 	auto run = engine.run();
 
 	if (run.has_value()) {
-		std::cerr << "Engine runtime error:\n" << run.value()->what() << "\n";
+		std::cerr << fmt::format("Engine runtime error:\n{}\n", run.value()->what());
 		delete run.value();
 	}
 	

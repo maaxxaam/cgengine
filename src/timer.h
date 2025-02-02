@@ -1,7 +1,7 @@
 #pragma once
 
 #include <optional>
-#include <vector>
+#include <EASTL/vector.h>
 
 #include "error.h"
 
@@ -18,5 +18,5 @@ public:
     void addTimer(float time, std::function<std::optional<Error *> ()>&& onTimer);
     MaybeMultipleErrors update(float delta);
 private:
-    std::vector<Timer> _timers;
+    eastl::vector<Timer> _timers;
 };

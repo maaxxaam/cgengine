@@ -37,7 +37,7 @@ public:
     bool isListening();
 private:
     bool _isListening = false;
-    std::multimap<uint32_t, EventCallback*> _listenerCallbacks;
+    eastl::multimap<uint32_t, EventCallback*> _listenerCallbacks;
 };
 
 } // End of namespace Events

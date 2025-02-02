@@ -2,8 +2,10 @@
 
 #include <entt/entt.hpp>
 
-#include <vector>
-#include <string>
+#include "eastloverloads.h"
+#include <EASTL/vector.h>
+#include <EASTL/hash_map.h>
+#include <EASTL/string.h>
 
 #include "deletionqueue.h"
 #include "expected.hpp"
@@ -32,13 +34,13 @@ public:
     virtual tl::expected<int, Error*> init(VulkanEngine* engine);
 
 	//create material and add it to the map
-	Material* addMaterial(VkPipeline pipeline, VkPipelineLayout layout, const std::string& name);
-	std::optional<Material*> getMaterial(const std::string& name);
+	Material* addMaterial(VkPipeline pipeline, VkPipelineLayout layout, const eastl::string& name);
+	std::optional<Material*> getMaterial(const eastl::string& name);
 
 	Object addEmptyObject();
-	tl::expected<Object, Error*> addRenderObject(const std::string &mapName);
+	tl::expected<Object, Error*> addRenderObject(const eastl::string &mapName);
 
-	std::optional<Mesh*> getMesh(const std::string& name);
+	std::optional<Mesh*> getMesh(const eastl::string& name);
 
 	Object getObject(entt::entity id);
 
@@ -61,9 +63,9 @@ protected:
 	//default array of renderable objects
 	Level _level;
 
-	std::unordered_map<std::string, Material> _materials;
-	std::unordered_map<std::string, Mesh> _meshes;
-	std::unordered_map<std::string, TextureAsset> _loadedTextures;
+	eastl::hash_map<eastl::string, Material> _materials;
+	eastl::hash_map<eastl::string, Mesh> _meshes;
+	eastl::hash_map<eastl::string, TextureAsset> _loadedTextures;
 
 	virtual tl::expected<int, Error*> loadMeshes(VulkanEngine* engine) { return 0; };
 

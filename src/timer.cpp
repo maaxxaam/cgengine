@@ -1,8 +1,8 @@
 #include "timer.h"
-#include <algorithm>
+#include <EASTL/algorithm.h>
 
 MaybeMultipleErrors TimerStorage::update(float delta) {
-    std::vector<Error *> errors{};
+    eastl::vector<Error *> errors{};
     for (auto item = _timers.rbegin(); item != _timers.rend(); item++) {
         if (item->time < delta) {
             item->time = 0;
@@ -15,7 +15,7 @@ MaybeMultipleErrors TimerStorage::update(float delta) {
         }
     }
     _timers.erase(
-    std::remove_if(_timers.begin(), _timers.end(),
+    eastl::remove_if(_timers.begin(), _timers.end(),
         [](const Timer & o) { return o.time <= 0; }),
     _timers.end());
     if (errors.empty())

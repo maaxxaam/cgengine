@@ -1,15 +1,16 @@
 #pragma once
 
-#include <string>
+#include "eastloverloads.h"
+#include <EASTL/string.h>
+#include <EASTL/fixed_substring.h>
 
 #include "src/objects/object.h"
 #include "src/objects/components/base.h"
 
-class TagComponent: public ComponentBase {
-public:
-    TagComponent(const Object& self, const std::string name): ComponentBase(self), _name(name) {};
+struct TagComponent: public ComponentBase {
+    TagComponent(const Object& self, const eastl::string name): ComponentBase(self), _name(name) {};
 
-    std::string getName() const { return _name; };
+    const eastl::fixed_substring<char> getName() const { return _name; };
 private:
-    std::string _name;
+    eastl::string _name;
 };

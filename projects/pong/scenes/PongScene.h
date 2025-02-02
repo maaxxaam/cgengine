@@ -28,5 +28,5 @@ private:
     int _score1 = 0, _score2 = 0;
     bool _waiting = false;
     Ball _ballObject;
-    std::vector<Object> _walls, _deaths;
+    eastl::vector<Object> _walls, _deaths;
 };

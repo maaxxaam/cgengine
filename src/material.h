@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include <vector>
+#include <EASTL/vector.h>
 
 #include "error.h"
 
@@ -16,7 +16,7 @@ class PipelineBuilder {
 public:
     PipelineBuilder();
 
-	std::vector<VkPipelineShaderStageCreateInfo> _shaderStages;
+	eastl::vector<VkPipelineShaderStageCreateInfo> _shaderStages;
 	VkPipelineVertexInputStateCreateInfo _vertexInputInfo;
 	VkPipelineInputAssemblyStateCreateInfo _inputAssembly;
 	VkViewport _viewport;
@@ -31,7 +31,7 @@ public:
     PipelineBuilder& addVertexShader(VkShaderModule& shader);
     PipelineBuilder& removeShaders();
 
-    tl::expected<VkPipelineLayout, VulkanError*> setLayout(std::vector<VkDescriptorSetLayout>& setLayouts, std::vector<VkPushConstantRange>& pushConstants);
+    tl::expected<VkPipelineLayout, VulkanError*> setLayout(eastl::vector<VkDescriptorSetLayout>& setLayouts, eastl::vector<VkPushConstantRange>& pushConstants);
 
 	tl::expected<VkPipeline, VulkanError*> build_pipeline(VkDevice device, VkRenderPass pass);
 
@@ -48,7 +48,7 @@ private:
 
     VkPipelineMultisampleStateCreateInfo multisamplingState();
 
-    VkPipelineLayoutCreateInfo pipelineLayout(std::vector<VkDescriptorSetLayout>& setLayouts, std::vector<VkPushConstantRange>& constantRanges);
+    VkPipelineLayoutCreateInfo pipelineLayout(eastl::vector<VkDescriptorSetLayout>& setLayouts, eastl::vector<VkPushConstantRange>& constantRanges);
 
 	VkPipelineColorBlendAttachmentState colorBlendAttachmentState();
 

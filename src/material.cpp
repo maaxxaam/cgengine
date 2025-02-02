@@ -29,7 +29,7 @@ PipelineBuilder& PipelineBuilder::removeShaders() {
     return *this;
 }
 
-tl::expected<VkPipelineLayout, VulkanError*> PipelineBuilder::setLayout(std::vector<VkDescriptorSetLayout>& setLayouts, std::vector<VkPushConstantRange>& pushConstants) {
+tl::expected<VkPipelineLayout, VulkanError*> PipelineBuilder::setLayout(eastl::vector<VkDescriptorSetLayout>& setLayouts, eastl::vector<VkPushConstantRange>& pushConstants) {
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = pipelineLayout(setLayouts, pushConstants);
 
 	auto pipeLayoutResult = vkcommand::createPipelineLayout(pipelineLayoutInfo);
@@ -65,7 +65,7 @@ tl::expected<VkPipeline, VulkanError*> PipelineBuilder::build_pipeline(VkDevice 
 		.pAttachments = &_colorBlendAttachment,
 	};
 
-	std::vector<VkDynamicState> stateVars = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+	eastl::vector<VkDynamicState> stateVars = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
 
 	VkPipelineDynamicStateCreateInfo dynamicState = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
@@ -173,7 +173,7 @@ VkPipelineMultisampleStateCreateInfo PipelineBuilder::multisamplingState() {
 	};
 }
 
-VkPipelineLayoutCreateInfo PipelineBuilder::pipelineLayout(std::vector<VkDescriptorSetLayout>& setLayouts, std::vector<VkPushConstantRange>& constantRanges) {
+VkPipelineLayoutCreateInfo PipelineBuilder::pipelineLayout(eastl::vector<VkDescriptorSetLayout>& setLayouts, eastl::vector<VkPushConstantRange>& constantRanges) {
 	return VkPipelineLayoutCreateInfo {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 		.pNext = nullptr,

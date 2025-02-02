@@ -21,8 +21,10 @@
 #ifndef OPENAWE_INPUTMAN_H
 #define OPENAWE_INPUTMAN_H
 
-#include <set>
-#include <map>
+#include "eastloverloads.h"
+#include <EASTL/hash_map.h>
+#include <EASTL/hash_set.h>
+
 #include <string>
 #include <optional>
 #include <functional>
@@ -63,9 +65,9 @@ private:
 	static void callbackJoystickConnectionChanged(int jid, int event);
 
 	std::optional<int> _activeGamepadId;
-	std::set<int> buttonsHeld;
-	std::map<int, double> triggerLastValues;
-	std::map<int, glm::vec2> stickLastValues;
+	eastl::hash_set<int> buttonsHeld;
+	eastl::hash_map<int, double> triggerLastValues;
+	eastl::hash_map<int, glm::vec2> stickLastValues;
 	std::optional<InputGamepadButtonCallback> buttonCallback;
 	std::optional<InputGamepadTriggerCallback> triggerCallback;
 	std::optional<InputGamepadStickCallback> stickCallback;

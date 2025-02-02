@@ -2,7 +2,7 @@
 #include "src/events/key.h"
 
 
-void PaddleController::init(DynamicCharacterController* controller, Events::Key left, Events::Key right, Events::Key up, Events::Key down, std::string prefix) {
+void PaddleController::init(DynamicCharacterController* controller, Events::Key left, Events::Key right, Events::Key up, Events::Key down, eastl::string prefix) {
     _strUp = prefix + "_UP";
     _strDown = prefix + "_DOWN";
     _strLeft = prefix + "_LEFT";

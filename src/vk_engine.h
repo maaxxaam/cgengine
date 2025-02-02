@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-#include <vector>
+#include <EASTL/vector.h>
 #include <functional>
 #include <optional>
 
@@ -62,9 +62,9 @@ public:
 	VkSwapchainKHR _swapchain;
 	VkFormat _swachainImageFormat;
 
-	std::vector<VkFramebuffer> _framebuffers;
-	std::vector<VkImage> _swapchainImages;
-	std::vector<VkImageView> _swapchainImageViews;	
+	eastl::vector<VkFramebuffer> _framebuffers;
+	eastl::vector<VkImage> _swapchainImages;
+	eastl::vector<VkImageView> _swapchainImageViews;	
 
     DeletionQueue _onEngineShutdown;
 	DeletionQueue _swapchainShutdown;

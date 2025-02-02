@@ -31,3 +31,15 @@
 [submodule "third_party/spdlog"]
 	path = third_party/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "third_party/assimp"]
+	path = third_party/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "third_party/tracy"]
+	path = third_party/tracy
+	url = https://github.com/wolfpld/tracy
+[submodule "third_party/HFSM2"]
+	path = third_party/HFSM2
+	url = https://github.com/andrew-gresyk/HFSM2
+[submodule "third_party/EASTL"]
+	path = third_party/EASTL
+	url = https://github.com/electronicarts/EASTL

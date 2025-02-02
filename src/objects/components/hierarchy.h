@@ -1,13 +1,12 @@
 #pragma once
 
-#include <bitset>
-#include <vector>
+#include <EASTL/vector.h>
 
 #include "base.h"
 #include "src/error.h"
 #include "src/objects/object.h"
 
-using entityList = std::vector<entt::entity>;
+using entityList = eastl::vector<entt::entity>;
 
 enum class InheritanceFlag {
     LOCAL_TRANSFORM = 0,

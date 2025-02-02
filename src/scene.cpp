@@ -18,7 +18,7 @@ tl::expected<int, Error*> Scene::init(VulkanEngine* engine) {
     return 0;
 }
 
-Material* Scene::addMaterial(VkPipeline pipeline, VkPipelineLayout layout, const std::string& name) {
+Material* Scene::addMaterial(VkPipeline pipeline, VkPipelineLayout layout, const eastl::string& name) {
 	Material mat;
 	mat.pipeline = pipeline;
 	mat.pipelineLayout = layout;
@@ -30,7 +30,7 @@ Object Scene::getObject(entt::entity id) {
 	return _level.getObject(id);
 }
 
-tl::expected<Object, Error*> Scene::addRenderObject(const std::string &mapName) {
+tl::expected<Object, Error*> Scene::addRenderObject(const eastl::string &mapName) {
 	auto mat = getMaterial(mapName);
 	auto mesh = getMesh(mapName);
 	if (!mesh.has_value() | !mat.has_value()) {
@@ -49,7 +49,7 @@ Object Scene::addEmptyObject() {
     return result;
 }
 
-std::optional<Material*> Scene::getMaterial(const std::string& name) {
+std::optional<Material*> Scene::getMaterial(const eastl::string& name) {
 	auto it = _materials.find(name);
 	if (it == _materials.end()) {
 		return std::nullopt;
@@ -57,7 +57,7 @@ std::optional<Material*> Scene::getMaterial(const std::string& name) {
 	return &(*it).second;
 }
 
-std::optional<Mesh*> Scene::getMesh(const std::string& name) {
+std::optional<Mesh*> Scene::getMesh(const eastl::string& name) {
 	auto it = _meshes.find(name);
 	if (it == _meshes.end()) {
 		return std::nullopt;

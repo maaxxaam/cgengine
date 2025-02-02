@@ -3,7 +3,7 @@
 #include "Follow.h"
 
 
-void BallController::init(DynamicCharacterController* controller, Events::Key left, Events::Key right, Events::Key up, Events::Key down, std::string prefix) {
+void BallController::init(DynamicCharacterController* controller, Events::Key left, Events::Key right, Events::Key up, Events::Key down, eastl::string prefix) {
     _strUp = prefix + "_UP";
     _strDown = prefix + "_DOWN";
     _strLeft = prefix + "_LEFT";
