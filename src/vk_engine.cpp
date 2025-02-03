@@ -2,12 +2,15 @@
 #include "expected.hpp"
 #include "src/crc32.h"
 #include "src/error.h"
-#include "src/platform/keyconversion.h"
 #include "src/platform/window.h"
 #include <cstdint>
 #include <fmt/core.h>
 #include <memory>
 #include <vulkan/vulkan_core.h>
+
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_vulkan.h"
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -17,6 +20,8 @@
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
 #include <VkBootstrap.h>
+
+#include <tracy/Tracy.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -41,6 +46,8 @@ void glfwOnError(int errCode, const char *message) {
 }
 
 std::optional<Error*> VulkanEngine::init() {
+	ZoneScopedN("VulkanEngine::init");
+
 	auto init_window = initWindow();
 
 	if (!init_window.has_value()) {
@@ -55,7 +62,8 @@ std::optional<Error*> VulkanEngine::init() {
 		.and_then([&](int x) { return initSyncStructures(); })
 		.and_then([&](int x) { return initDescriptors(); })
 		.and_then([&](int x) { return initPipelines(); })
-		.and_then([&](int x) { return initFrames(); });
+		.and_then([&](int x) { return initFrames(); })
+		.and_then([&](int x) { return initImgui(); });
 
 	if (!init_vulkan.has_value()) {
 		return new Error(init_vulkan.error(), ErrorMessage("Vulkan structures initialization failed"));
@@ -100,6 +108,9 @@ void VulkanEngine::cleanup() {
 }
 
 std::optional<Error*> VulkanEngine::handleResize() {
+
+	ZoneScopedN("VulkanEngine::handleResize");
+
 	// When minimized, window can have 0 width / height. Postpone resizing in that case
 	unsigned int width = 0, height = 0;
 	_window->getSize(width, height);
@@ -125,10 +136,16 @@ std::optional<Error*> VulkanEngine::handleResize() {
 
 std::optional<Error*> VulkanEngine::draw() {
 	// TODO: check if window is minimized and skip drawing
-	
-	std::optional<VulkanError*> operationResult = thisFrame()._renderFence.wait(UINT64_MAX);
+
+	ZoneScopedN("VulkanEngine::draw");
+	std::optional<VulkanError*> operationResult;
+
+	{
+	ZoneScopedN("Wait for old frame to finish");
+	operationResult = thisFrame()._renderFence.wait(UINT64_MAX);
 	if (operationResult) {
 		return new VulkanError(operationResult.value()->getCode(), operationResult.value(), ErrorMessage("Error while waiting for previous frame to finish"));
+	}
 	}
 
 	operationResult = thisFrame()._renderFence.reset();
@@ -190,6 +207,9 @@ std::optional<Error*> VulkanEngine::draw() {
 	if (drawResult) {
 		new VulkanError(drawResult.value()->getCode(), drawResult.value(), ErrorMessage("Failed to draw objects"));
 	}
+	// Record dear imgui primitives into command buffer
+	ImGui::Render();
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 
 	vkCmdEndRenderPass(cmd);
 	// finalize the command buffer (we can no longer add commands, but it can now be executed)
@@ -213,11 +233,14 @@ std::optional<Error*> VulkanEngine::draw() {
 	submit.signalSemaphoreCount = 1;
 	submit.pSignalSemaphores = &thisFrame()._renderSemaphore;
 
+	{
+	ZoneScopedN("vkQueueSubmit");
 	// submit command buffer to the queue and execute it.
 	// _renderFence will now block until the graphic commands finish execution
 	operationResult = vkcommand::singleQueueSubmit(_graphicsQueue, submit, thisFrame()._renderFence());
 	if (operationResult) {
 		return new VulkanError(operationResult.value()->getCode(), operationResult.value(), ErrorMessage("Failed to submit command buffer to graphics queue"));
+	}
 	}
 
 	// prepare present
@@ -234,6 +257,8 @@ std::optional<Error*> VulkanEngine::draw() {
 
 	presentInfo.pImageIndices = &swapchainImageIndex;
 
+	{
+	ZoneScopedN("vkQueuePresent");
 	operationResult = vkcommand::queuePresent(_graphicsQueue, presentInfo);
 	if (operationResult) {
 		if (operationResult.value()->isResizeError()) {
@@ -243,13 +268,19 @@ std::optional<Error*> VulkanEngine::draw() {
 		} else
 			return new VulkanError(operationResult.value()->getCode(), operationResult.value(), ErrorMessage("Error while presenting graphics queue"));
 	}
+	}
 
 	_frameNumber++;
+
+	FrameMark;
 
 	return std::nullopt;
 }
 
 std::optional<Error*> VulkanEngine::run() {
+
+	ZoneScopedN("VulkanEngine::run");
+
 	bool shouldClose = false;
 	std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
 
@@ -260,6 +291,8 @@ std::optional<Error*> VulkanEngine::run() {
 		_time = std::chrono::duration_cast<std::chrono::microseconds>(now - _start_time).count() * 1e-6;
 
 		// Update physics' objects
+		{
+		ZoneScopedN("Physics update");
 		PhysicsMan.update(deltaSeconds);
 		for (auto &&[entity, body]: _scene->getRigidBodies().each()) {
 			body.update(deltaSeconds);
@@ -270,8 +303,20 @@ std::optional<Error*> VulkanEngine::run() {
 		for (auto &&[entity, collision]: _scene->getCollisions().each()) {
 			collision.update(deltaSeconds);
 		}
+		}
 
+		{
+		ZoneScopedN("Scene Update");
 		_scene->update(deltaSeconds);
+		}
+
+		{
+		ZoneScopedN("Update ImGui");
+		ImGui_ImplVulkan_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGui::ShowDemoWindow(); // Show demo window! :)
+		}
 
 		auto drawResult = draw();
 		if (drawResult) {
@@ -418,7 +463,7 @@ tl::expected<int, Error*> VulkanEngine::initSwapchain() {
 
 	auto swapchainResult = swapchainBuilder
 		.use_default_format_selection()
-		.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+		.set_desired_present_mode(VK_PRESENT_MODE_MAILBOX_KHR)
 		.set_desired_extent(_windowExtent.width, _windowExtent.height)
 		.build();
 	if (!swapchainResult.has_value()) {
@@ -843,6 +888,8 @@ tl::expected<int, VulkanError*> VulkanEngine::upload_mesh(Mesh& mesh) {
 }
 
 std::optional<VulkanError*> VulkanEngine::draw_objects(VkCommandBuffer cmd) {
+	ZoneScopedN("VulkanEngine::draw_objects");
+
 	float framed = (_frameNumber / 120.f);
 
 	//_sceneParameters.ambientColor = { sin(framed),0,cos(framed),1 };
@@ -865,6 +912,8 @@ std::optional<VulkanError*> VulkanEngine::draw_objects(VkCommandBuffer cmd) {
 	
 	GPUObjectData* objectSSBO = (GPUObjectData*)mapResult.value();
 
+	{
+	ZoneScopedN("Fill object buffer");
 	int counter = 0;
 	for (auto &&[entity, object, transform]: _scene->getSimpleRenders().each()) {
 		Object renderObject = _scene->getObject(entity);
@@ -874,13 +923,15 @@ std::optional<VulkanError*> VulkanEngine::draw_objects(VkCommandBuffer cmd) {
 		//index->index = counter;
 		counter++;
 	}
+	}
 	
 	VMAlloc.unmapBuffer(thisFrame().objectBuffer);
 
 	Mesh* lastMesh = nullptr;
 	Material* lastMaterial = nullptr;
 	
-	// for (int i = 0; i < count; i++) {
+	{
+	ZoneScopedN("Draw objects for each camera");
 	for (auto &&[camEntity, camera]: _scene->getCameras().each()) {
 		auto mapResult = VMAlloc.mapBuffer(thisFrame().cameraBuffer);
 		VK_OPTIONAL_ERROR(mapResult, "Could not map camera buffer");
@@ -893,6 +944,7 @@ std::optional<VulkanError*> VulkanEngine::draw_objects(VkCommandBuffer cmd) {
 		for (auto &&[entity, object, transform, SSBO]: _scene->getRenders().each()) {
 			//only bind the pipeline if it doesnt match with the already bound one
 			if (object.material != lastMaterial) {
+				ZoneScopedN("Bind new material");
 
 				vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, object.material->pipeline);
 				lastMaterial = object.material;
@@ -947,6 +999,7 @@ std::optional<VulkanError*> VulkanEngine::draw_objects(VkCommandBuffer cmd) {
 			}
 			vkCmdDraw(cmd, object.mesh->_vertices.size(), 1,0 , SSBO.index);
 		}
+	}
 	}
 	return std::nullopt;
 }
@@ -1086,6 +1139,55 @@ tl::expected<int, Error*> VulkanEngine::initFrames() {
 		_onEngineShutdown.push_function(frameResult.value().destroyCommands);
 		_onEngineShutdown.push_function(frameResult.value().destroyDescriptors);
 	}	
+
+	return 0;
+}
+
+static void imgui_check_vk_result(VkResult err) {
+    if (err == VK_SUCCESS) return;
+    fmt::println(stderr, "[vulkan] Error: VkResult = {}\n", (int)err);
+    if (err < 0) abort();
+}
+
+tl::expected<int, Error*> VulkanEngine::initImgui() {
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+
+	ImGui_ImplGlfw_InitForVulkan(_window->getWindowHandle(), true);          
+	// Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+	ImGui_ImplVulkan_InitInfo init_info = {};
+	init_info.Instance = _instance;
+	init_info.PhysicalDevice = _chosenGPU;
+	init_info.Device = DeviceRef();
+	init_info.QueueFamily = _graphicsQueueFamily;
+	init_info.Queue = _graphicsQueue;
+	init_info.PipelineCache = nullptr; // TODO: should I be using a pipeline cache?
+	init_info.DescriptorPool = _descriptorPool;
+	init_info.RenderPass = _renderPass;
+	init_info.Subpass = 0;
+	init_info.MinImageCount = 2;
+	init_info.ImageCount = 2;
+	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+	init_info.Allocator = nullptr;
+	init_info.CheckVkResultFn = imgui_check_vk_result;
+	ImGui_ImplVulkan_Init(&init_info);
+
+	/* I'm not sure I need this atm
+	// (this gets a bit more complicated, see example app for full reference)
+	ImGui_ImplVulkan_CreateFontsTexture();
+	// (your code submit a queue)
+	ImGui_ImplVulkan_DestroyFontsTexture();
+	*/
+
+	_onEngineShutdown.push_function([&]() {
+		ImGui_ImplVulkan_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
+	});
 
 	return 0;
 }

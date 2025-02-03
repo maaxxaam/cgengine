@@ -15,6 +15,10 @@ add_subdirectory(glfw)
 add_subdirectory(fmt)
 add_subdirectory(EASTL)
 
+option (TRACY_ENABLE "" ON)
+option (TRACY_ON_DEMAND "" ON)
+add_subdirectory(tracy)
+
 add_library(stb_image INTERFACE)
 
 add_library(tinyobjloader STATIC)
@@ -56,6 +60,7 @@ target_sources(imgui PRIVATE
 
   imgui/imgui_demo.cpp
   imgui/imgui_draw.cpp
+  imgui/imgui_tables.cpp
   imgui/imgui_widgets.cpp
 
   imgui/backends/imgui_impl_vulkan.cpp

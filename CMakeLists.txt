@@ -14,6 +14,7 @@ find_package(Vulkan REQUIRED)
 add_subdirectory(third_party)
 
 add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
+add_definitions(-DTRACY_ENABLE)
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
@@ -44,6 +45,7 @@ target_link_libraries(engine_src
       EnTT::EnTT
       leaf
       EASTL
+      TracyClient
  )
 
  target_include_directories(engine_src PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

@@ -47,7 +47,6 @@ public:
 	VkInstance _instance;
 	VkDebugUtilsMessengerEXT _debugMessenger;
 	VkPhysicalDevice _chosenGPU;
-	VkDevice _device;
 
 	VkPhysicalDeviceProperties _gpuProperties;
 
@@ -141,6 +140,8 @@ private:
 	tl::expected<int, Error*> initDescriptors();
 
 	tl::expected<int, Error*> initFrames();
+
+	tl::expected<int, Error*> initImgui();
 
 	tl::expected<int, Error*> loadScene(Scene& scene);
 
